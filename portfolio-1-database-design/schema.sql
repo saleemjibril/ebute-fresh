@@ -165,15 +165,15 @@ CREATE TABLE allocation (
 );
 
 -- A foreign key cannot check that the lot is the same commodity and grade
--- as the order line, so a trigger does it.
+-- as the order line, so a trigger does it. A missing line or lot is left
+-- for the foreign keys to report.
 CREATE FUNCTION check_allocation_match() RETURNS trigger AS $$
 BEGIN
-    IF NOT EXISTS (
+    IF EXISTS (
         SELECT 1
-        FROM order_line ol
-        JOIN produce_lot l ON l.commodity_id = ol.commodity_id
-                          AND l.grade = ol.grade
-        WHERE ol.order_id = NEW.order_id
+        FROM order_line ol, produce_lot l
+        WHERE (l.commodity_id, l.grade) <> (ol.commodity_id, ol.grade)
+          AND ol.order_id = NEW.order_id
           AND ol.line_no  = NEW.line_no
           AND l.lot_id    = NEW.lot_id
     ) THEN
