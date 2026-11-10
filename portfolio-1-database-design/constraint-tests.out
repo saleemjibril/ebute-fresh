@@ -1,0 +1,201 @@
+
+===== Part 1: inserts and updates that must be rejected =====
+
+-- 1. Grade D does not exist
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received, qty_remaining,
+                         farm_gate_price, received_by)
+VALUES (1, 1, 1, 'D', 10, 10, 24000, 1);
+psql:constraint-tests.sql:15: ERROR:  value for domain produce_grade violates check constraint "produce_grade_check"
+
+-- 2. Cannot have more left than was received
+UPDATE produce_lot SET qty_remaining = qty_received + 5 WHERE lot_id = 2;
+psql:constraint-tests.sql:19: ERROR:  new row for relation "produce_lot" violates check constraint "produce_lot_check"
+DETAIL:  Failing row contains (2, 2, 1, 1, B, 45, 50, 19000.00, 2026-11-02 08:15:00+01, 1, 2).
+
+-- 3. Stock cannot go negative (overselling)
+UPDATE produce_lot SET qty_remaining = qty_remaining - 31 WHERE lot_id = 2;
+psql:constraint-tests.sql:23: ERROR:  new row for relation "produce_lot" violates check constraint "produce_lot_check"
+DETAIL:  Failing row contains (2, 2, 1, 1, B, 45, -1, 19000.00, 2026-11-02 08:15:00+01, 1, 2).
+
+-- 4. Officer from Bukuru recording a lot at Kadawa
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received, qty_remaining,
+                         farm_gate_price, received_by)
+VALUES (1, 1, 1, 'A', 10, 10, 24000, 2);
+psql:constraint-tests.sql:29: ERROR:  insert or update on table "produce_lot" violates foreign key constraint "produce_lot_received_by_centre_id_fkey"
+DETAIL:  Key (received_by, centre_id)=(2, 1) is not present in table "staff".
+
+-- 5. Sales staff cannot record an intake
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received, qty_remaining,
+                         farm_gate_price, received_by)
+VALUES (1, 1, 1, 'A', 10, 10, 24000, 6);
+psql:constraint-tests.sql:35: ERROR:  insert or update on table "produce_lot" violates foreign key constraint "produce_lot_received_by_centre_id_fkey"
+DETAIL:  Key (received_by, centre_id)=(6, 1) is not present in table "staff".
+
+-- 6. Lot 14 (Aminu Garba) paid through payout 1, which belongs to Musa Abdullahi
+UPDATE produce_lot SET payout_id = 1 WHERE lot_id = 14;
+psql:constraint-tests.sql:39: ERROR:  insert or update on table "produce_lot" violates foreign key constraint "produce_lot_payout_id_farmer_id_fkey"
+DETAIL:  Key (payout_id, farmer_id)=(1, 2) is not present in table "farmer_payout".
+
+-- 7. Intake officer with no centre
+INSERT INTO staff (full_name, role, centre_id, phone)
+VALUES ('Test Officer', 'intake_officer', NULL, '+2348030000001');
+psql:constraint-tests.sql:44: ERROR:  new row for relation "staff" violates check constraint "staff_check"
+DETAIL:  Failing row contains (10, Test Officer, intake_officer, null, +2348030000001).
+
+-- 8. Phone number in local format instead of +234
+INSERT INTO farmer (first_name, last_name, phone, home_centre_id)
+VALUES ('Sani', 'Bello', '08031234567', 1);
+psql:constraint-tests.sql:49: ERROR:  value for domain ng_phone violates check constraint "ng_phone_check"
+
+-- 9. Two farmers with the same phone number
+INSERT INTO farmer (first_name, last_name, phone, home_centre_id)
+VALUES ('Sani', 'Bello', '+2348036621904', 1);
+psql:constraint-tests.sql:54: ERROR:  duplicate key value violates unique constraint "farmer_phone_key"
+DETAIL:  Key (phone)=(+2348036621904) already exists.
+
+-- 10. Bank name without an account number
+INSERT INTO farmer (first_name, last_name, phone, home_centre_id, bank_name)
+VALUES ('Sani', 'Bello', '+2348030000002', 1, 'UBA');
+psql:constraint-tests.sql:59: ERROR:  new row for relation "farmer" violates check constraint "farmer_check"
+DETAIL:  Failing row contains (16, Sani, Bello, +2348030000002, 1, UBA, null, 2026-11-10).
+
+-- 11. Order for a customer that does not exist
+INSERT INTO sales_order (customer_id, taken_by, delivery_date) VALUES (99, 6, '2026-11-12');
+psql:constraint-tests.sql:63: ERROR:  insert or update on table "sales_order" violates foreign key constraint "sales_order_customer_id_fkey"
+DETAIL:  Key (customer_id)=(99) is not present in table "customer".
+
+-- 12. Unknown order status
+UPDATE sales_order SET status = 'shipped' WHERE order_id = 6;
+psql:constraint-tests.sql:67: ERROR:  new row for relation "sales_order" violates check constraint "sales_order_status_check"
+DETAIL:  Failing row contains (6, 5, 6, 2026-11-08 12:20:00+01, 2026-11-10, shipped).
+
+-- 13. Same commodity and grade twice on one order
+INSERT INTO order_line VALUES (6, 4, 1, 'A', 5, 42000);
+psql:constraint-tests.sql:71: ERROR:  duplicate key value violates unique constraint "order_line_order_id_commodity_id_grade_key"
+DETAIL:  Key (order_id, commodity_id, grade)=(6, 1, A) already exists.
+
+-- 14. Zero quantity on an order line
+INSERT INTO order_line VALUES (7, 3, 2, 'A', 0, 120000);
+psql:constraint-tests.sql:75: ERROR:  new row for relation "order_line" violates check constraint "order_line_quantity_check"
+DETAIL:  Failing row contains (7, 3, 2, A, 0, 120000.00).
+
+-- 15. Allocating a yam lot (8) to a tomato line (order 6 line 1)
+INSERT INTO allocation VALUES (6, 1, 8, 5);
+psql:constraint-tests.sql:79: ERROR:  lot 8 does not match commodity and grade of order 6 line 1
+CONTEXT:  PL/pgSQL function check_allocation_match() line 11 at RAISE
+
+-- 16. Allocating to an order line that does not exist
+INSERT INTO allocation VALUES (7, 9, 15, 10);
+psql:constraint-tests.sql:83: ERROR:  insert or update on table "allocation" violates foreign key constraint "allocation_order_id_line_no_fkey"
+DETAIL:  Key (order_id, line_no)=(7, 9) is not present in table "order_line".
+
+-- 17. Transfer with no reference
+INSERT INTO payment (order_id, amount, method) VALUES (4, 500000, 'transfer');
+psql:constraint-tests.sql:87: ERROR:  new row for relation "payment" violates check constraint "payment_check"
+DETAIL:  Failing row contains (6, 4, 500000.00, transfer, null, 2026-11-10 18:39:51.939885+01).
+
+-- 18. Same bank reference used twice
+INSERT INTO payment (order_id, amount, method, reference)
+VALUES (6, 100000, 'transfer', 'NIP000231104771');
+psql:constraint-tests.sql:92: ERROR:  duplicate key value violates unique constraint "payment_reference_key"
+DETAIL:  Key (reference)=(NIP000231104771) already exists.
+
+-- 19. Deleting a farmer who has lots
+DELETE FROM farmer WHERE farmer_id = 1;
+psql:constraint-tests.sql:96: ERROR:  update or delete on table "farmer" violates foreign key constraint "farmer_payout_farmer_id_fkey" on table "farmer_payout"
+DETAIL:  Key (farmer_id)=(1) is still referenced from table "farmer_payout".
+
+===== Part 2: consistency checks on the sample data (expect 0 rows each) =====
+
+-- 20. qty_remaining agrees with what has been allocated
+SELECT l.lot_id, l.qty_received, l.qty_remaining,
+       coalesce(sum(a.quantity), 0) AS allocated
+FROM produce_lot l
+LEFT JOIN allocation a ON a.lot_id = l.lot_id
+GROUP BY l.lot_id
+HAVING l.qty_remaining <> l.qty_received - coalesce(sum(a.quantity), 0);
+ lot_id | qty_received | qty_remaining | allocated 
+--------+--------------+---------------+-----------
+(0 rows)
+
+
+-- 21. Confirmed and delivered lines are fully allocated
+SELECT ol.order_id, ol.line_no, ol.quantity, coalesce(sum(a.quantity), 0) AS allocated
+FROM order_line ol
+JOIN sales_order o ON o.order_id = ol.order_id
+LEFT JOIN allocation a ON (a.order_id, a.line_no) = (ol.order_id, ol.line_no)
+WHERE o.status IN ('confirmed', 'delivered')
+GROUP BY ol.order_id, ol.line_no, ol.quantity
+HAVING coalesce(sum(a.quantity), 0) <> ol.quantity;
+ order_id | line_no | quantity | allocated 
+----------+---------+----------+-----------
+(0 rows)
+
+
+-- 22. Pending and cancelled orders hold no stock
+SELECT a.*
+FROM allocation a
+JOIN sales_order o ON o.order_id = a.order_id
+WHERE o.status IN ('pending', 'cancelled');
+ order_id | line_no | lot_id | quantity 
+----------+---------+--------+----------
+(0 rows)
+
+
+-- 23. Each payout equals the value of the lots it settles
+SELECT p.payout_id, p.amount, sum(l.qty_received * l.farm_gate_price) AS lots_value
+FROM farmer_payout p
+JOIN produce_lot l ON l.payout_id = p.payout_id
+GROUP BY p.payout_id, p.amount
+HAVING p.amount <> sum(l.qty_received * l.farm_gate_price);
+ payout_id | amount | lots_value 
+-----------+--------+------------
+(0 rows)
+
+
+-- 24. No order has been paid more than its value
+SELECT o.order_id, t.order_value, sum(p.amount) AS paid
+FROM sales_order o
+JOIN (SELECT order_id, sum(quantity * unit_price) AS order_value
+      FROM order_line GROUP BY order_id) t ON t.order_id = o.order_id
+JOIN payment p ON p.order_id = o.order_id
+GROUP BY o.order_id, t.order_value
+HAVING sum(p.amount) > t.order_value;
+ order_id | order_value | paid 
+----------+-------------+------
+(0 rows)
+
+
+-- 25. Nothing was allocated from a lot before it was received
+SELECT a.order_id, a.line_no, a.lot_id, l.received_at, o.delivery_date
+FROM allocation a
+JOIN produce_lot l ON l.lot_id = a.lot_id
+JOIN sales_order o ON o.order_id = a.order_id
+WHERE l.received_at::date > o.delivery_date;
+ order_id | line_no | lot_id | received_at | delivery_date 
+----------+---------+--------+-------------+---------------
+(0 rows)
+
+
+===== Summary: outstanding balances =====
+SELECT o.order_id, c.business_name, o.status,
+       t.order_value, coalesce(sum(p.amount), 0) AS paid,
+       t.order_value - coalesce(sum(p.amount), 0) AS balance
+FROM sales_order o
+JOIN customer c ON c.customer_id = o.customer_id
+JOIN (SELECT order_id, sum(quantity * unit_price) AS order_value
+      FROM order_line GROUP BY order_id) t ON t.order_id = o.order_id
+LEFT JOIN payment p ON p.order_id = o.order_id
+WHERE o.status <> 'cancelled'
+GROUP BY o.order_id, c.business_name, o.status, t.order_value
+ORDER BY o.order_id;
+ order_id |      business_name      |  status   | order_value |    paid    |  balance   
+----------+-------------------------+-----------+-------------+------------+------------
+        1 | GreenBasket Supermarket | delivered |  1930000.00 | 1930000.00 |       0.00
+        2 | Sule Onion Depot        | delivered |  2400000.00 | 2400000.00 |       0.00
+        3 | Iya Basira Foods        | delivered |  1130000.00 | 1130000.00 |       0.00
+        4 | Kemi's Events Catering  | delivered |  2110000.00 | 1055000.00 | 1055000.00
+        6 | Lagoon View Supermarket | confirmed |  1230000.00 |          0 | 1230000.00
+        7 | Ofada Spot              | pending   |   855000.00 |          0 |  855000.00
+(6 rows)
+
