@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS payment, allocation, order_line, sales_order, customer,
                      produce_lot, farmer_payout, commodity_price, commodity,
                      farmer, staff, collection_centre, state CASCADE;
 DROP VIEW IF EXISTS lot_stock;
+DROP FUNCTION IF EXISTS check_allocation_match();
 DROP DOMAIN IF EXISTS produce_grade, ng_phone;
 
 
@@ -162,6 +163,30 @@ CREATE TABLE allocation (
     PRIMARY KEY (order_id, line_no, lot_id),
     FOREIGN KEY (order_id, line_no) REFERENCES order_line ON DELETE CASCADE
 );
+
+-- A foreign key cannot check that the lot is the same commodity and grade
+-- as the order line, so a trigger does it.
+CREATE FUNCTION check_allocation_match() RETURNS trigger AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM order_line ol
+        JOIN produce_lot l ON l.commodity_id = ol.commodity_id
+                          AND l.grade = ol.grade
+        WHERE ol.order_id = NEW.order_id
+          AND ol.line_no  = NEW.line_no
+          AND l.lot_id    = NEW.lot_id
+    ) THEN
+        RAISE EXCEPTION 'lot % does not match commodity and grade of order % line %',
+                        NEW.lot_id, NEW.order_id, NEW.line_no;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER allocation_match
+    BEFORE INSERT OR UPDATE ON allocation
+    FOR EACH ROW EXECUTE FUNCTION check_allocation_match();
 
 -- Cash has no reference; transfers and POS payments must have one.
 CREATE TABLE payment (
