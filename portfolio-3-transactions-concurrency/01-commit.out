@@ -1,0 +1,57 @@
+--- Before: order 7 and the lots it can draw from
+SELECT order_id, status FROM sales_order WHERE order_id = 7;
+ order_id | status  
+----------+---------
+        7 | pending
+(1 row)
+
+SELECT lot_id, commodity_name, grade, qty_remaining, received_at::date
+FROM lot_stock
+WHERE (commodity_name, grade) IN (('Yam', 'A'), ('Scotch bonnet', 'A')) AND qty_remaining > 0
+ORDER BY commodity_name, received_at;
+ lot_id | commodity_name | grade | qty_remaining | received_at 
+--------+----------------+-------+---------------+-------------
+     10 | Scotch bonnet  | A     |            15 | 2026-11-05
+      8 | Yam            | A     |           300 | 2026-11-02
+     15 | Yam            | A     |           300 | 2026-11-08
+(3 rows)
+
+BEGIN;
+BEGIN
+SELECT confirm_order(7);
+ confirm_order 
+---------------
+ 
+(1 row)
+
+--- Inside the transaction, before COMMIT
+SELECT * FROM allocation WHERE order_id = 7 ORDER BY line_no, lot_id;
+ order_id | line_no | lot_id | quantity 
+----------+---------+--------+----------
+        7 |       1 |      8 |      150
+        7 |       2 |     10 |        4
+(2 rows)
+
+COMMIT;
+COMMIT
+--- After COMMIT
+SELECT order_id, status FROM sales_order WHERE order_id = 7;
+ order_id |  status   
+----------+-----------
+        7 | confirmed
+(1 row)
+
+SELECT a.line_no, a.lot_id, a.quantity, l.qty_received, l.qty_remaining, l.received_at::date
+FROM allocation a JOIN produce_lot l USING (lot_id)
+WHERE a.order_id = 7
+ORDER BY a.line_no;
+ line_no | lot_id | quantity | qty_received | qty_remaining | received_at 
+---------+--------+----------+--------------+---------------+-------------
+       1 |      8 |      150 |          400 |           150 | 2026-11-02
+       2 |     10 |        4 |           15 |            11 | 2026-11-05
+(2 rows)
+
+--- Confirming the same order a second time is refused
+SELECT confirm_order(7);
+psql:01-commit.sql:28: ERROR:  order 7 is already confirmed
+CONTEXT:  PL/pgSQL function confirm_order(bigint) line 18 at RAISE

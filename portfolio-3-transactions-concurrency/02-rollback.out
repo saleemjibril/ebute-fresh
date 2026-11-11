@@ -1,0 +1,144 @@
+
+=== 2a. Explicit ROLLBACK: the customer changes their mind mid-order ===
+BEGIN;
+BEGIN
+INSERT INTO sales_order (customer_id, taken_by, placed_at, delivery_date)
+VALUES (4, 7, '2026-11-10 10:05+01', '2026-11-11');
+INSERT 0 1
+INSERT INTO order_line
+VALUES (currval(pg_get_serial_sequence('sales_order', 'order_id')), 1, 2, 'B', 15, 100000);
+INSERT 0 1
+--- Inside the transaction the new order exists
+SELECT o.order_id, o.customer_id, l.commodity_id, l.grade, l.quantity
+FROM sales_order o JOIN order_line l USING (order_id)
+WHERE o.order_id = currval(pg_get_serial_sequence('sales_order', 'order_id'));
+ order_id | customer_id | commodity_id | grade | quantity 
+----------+-------------+--------------+-------+----------
+       10 |           4 |            2 | B     |       15
+(1 row)
+
+ROLLBACK;
+ROLLBACK
+--- After ROLLBACK it is gone, header and line both
+SELECT count(*) AS orders_for_customer_4_on_10_nov
+FROM sales_order
+WHERE customer_id = 4 AND placed_at::date = '2026-11-10';
+ orders_for_customer_4_on_10_nov 
+---------------------------------
+                               0
+(1 row)
+
+
+=== 2b. An error aborts the whole transaction ===
+BEGIN;
+BEGIN
+INSERT INTO sales_order (customer_id, taken_by, placed_at, delivery_date)
+VALUES (2, 6, '2026-11-10 10:20+01', '2026-11-11');
+INSERT 0 1
+INSERT INTO order_line
+VALUES (currval(pg_get_serial_sequence('sales_order', 'order_id')), 1, 1, 'A', 100, 42000);
+INSERT 0 1
+SELECT confirm_order(currval(pg_get_serial_sequence('sales_order', 'order_id')));
+psql:02-rollback.sql:39: ERROR:  not enough stock for order 11 line 1: short by 35 units
+CONTEXT:  PL/pgSQL function confirm_order(bigint) line 52 at RAISE
+--- Any further statement is refused until the transaction ends
+SELECT count(*) FROM allocation;
+psql:02-rollback.sql:42: ERROR:  current transaction is aborted, commands ignored until end of transaction block
+ROLLBACK;
+ROLLBACK
+--- After ROLLBACK: no new order, no allocations, tomato stock untouched
+SELECT count(*) AS orders_placed_10_nov_10_20
+FROM sales_order WHERE placed_at = '2026-11-10 10:20+01';
+ orders_placed_10_nov_10_20 
+----------------------------
+                          0
+(1 row)
+
+SELECT count(*) AS allocations_in_table FROM allocation;
+ allocations_in_table 
+----------------------
+                   14
+(1 row)
+
+SELECT lot_id, qty_remaining FROM produce_lot WHERE lot_id IN (14, 19) ORDER BY lot_id;
+ lot_id | qty_remaining 
+--------+---------------
+     14 |            25
+     19 |            40
+(2 rows)
+
+
+=== 2c. Savepoints: one failure in the Friday payout run ===
+--- Unpaid lots before the run
+SELECT farmer_id, lot_id, qty_received * farm_gate_price AS value
+FROM produce_lot
+WHERE farmer_id IN (2, 10, 12) AND payout_id IS NULL
+ORDER BY farmer_id, lot_id;
+ farmer_id | lot_id |   value    
+-----------+--------+------------
+         2 |     14 | 1300000.00
+         2 |     19 | 1080000.00
+        10 |     10 |  480000.00
+        12 |     12 |  440000.00
+        12 |     18 |  406000.00
+(5 rows)
+
+BEGIN;
+BEGIN
+SAVEPOINT farmer_12;
+SAVEPOINT
+WITH p AS (
+    INSERT INTO farmer_payout (farmer_id, amount, paid_at, bank_ref, paid_by)
+    SELECT 12, sum(qty_received * farm_gate_price), '2026-11-13 14:02+01', 'FT26111300201', 8
+    FROM produce_lot WHERE farmer_id = 12 AND payout_id IS NULL
+    RETURNING payout_id
+)
+UPDATE produce_lot SET payout_id = (SELECT payout_id FROM p)
+WHERE farmer_id = 12 AND payout_id IS NULL;
+UPDATE 2
+RELEASE SAVEPOINT farmer_12;
+RELEASE
+SAVEPOINT farmer_10;
+SAVEPOINT
+WITH p AS (
+    INSERT INTO farmer_payout (farmer_id, amount, paid_at, bank_ref, paid_by)
+    SELECT 10, sum(qty_received * farm_gate_price), '2026-11-13 14:04+01', 'FT26110600118', 8
+    FROM produce_lot WHERE farmer_id = 10 AND payout_id IS NULL
+    RETURNING payout_id
+)
+UPDATE produce_lot SET payout_id = (SELECT payout_id FROM p)
+WHERE farmer_id = 10 AND payout_id IS NULL;
+psql:02-rollback.sql:87: ERROR:  duplicate key value violates unique constraint "farmer_payout_bank_ref_key"
+DETAIL:  Key (bank_ref)=(FT26110600118) already exists.
+ROLLBACK TO SAVEPOINT farmer_10;
+ROLLBACK
+SAVEPOINT farmer_2;
+SAVEPOINT
+WITH p AS (
+    INSERT INTO farmer_payout (farmer_id, amount, paid_at, bank_ref, paid_by)
+    SELECT 2, sum(qty_received * farm_gate_price), '2026-11-13 14:06+01', 'FT26111300203', 8
+    FROM produce_lot WHERE farmer_id = 2 AND payout_id IS NULL
+    RETURNING payout_id
+)
+UPDATE produce_lot SET payout_id = (SELECT payout_id FROM p)
+WHERE farmer_id = 2 AND payout_id IS NULL;
+UPDATE 2
+RELEASE SAVEPOINT farmer_2;
+RELEASE
+COMMIT;
+COMMIT
+--- After COMMIT: farmers 12 and 2 are paid, farmer 10 is still waiting
+SELECT l.farmer_id, l.lot_id, l.payout_id, p.amount, p.bank_ref
+FROM produce_lot l
+LEFT JOIN farmer_payout p USING (payout_id)
+WHERE l.farmer_id IN (2, 10, 12) AND l.received_at >= '2026-11-05'
+ORDER BY l.farmer_id, l.lot_id;
+ farmer_id | lot_id | payout_id |   amount   |   bank_ref    
+-----------+--------+-----------+------------+---------------
+         2 |     14 |        10 | 2380000.00 | FT26111300203
+         2 |     19 |        10 | 2380000.00 | FT26111300203
+        10 |     10 |           |            | 
+        12 |     12 |         8 |  846000.00 | FT26111300201
+        12 |     18 |         8 |  846000.00 | FT26111300201
+(5 rows)
+
