@@ -1,0 +1,12 @@
+  time   session
+  0.00s   A   BEGIN (read committed)
+  0.01s   A   confirm_order(8) done: took 20 crates from lot 14, not committed yet
+  0.50s   B   BEGIN (read committed)
+  0.52s   B   calls confirm_order(9) ...
+  1.04s   A   sees session 3495 waiting on Lock/transactionid: SELECT confirm_order(9);
+  2.04s   A   COMMIT
+  2.05s   B   confirm_order(9) done: took 5 crates from lot 14
+  2.05s   B   confirm_order(9) done: took 10 crates from lot 19
+  2.05s   B   COMMIT
+  2.05s   B   RESULT lot 14: received 50, allocated 50, qty_remaining 0
+  2.05s   B   RESULT lot 19: received 40, allocated 10, qty_remaining 30
