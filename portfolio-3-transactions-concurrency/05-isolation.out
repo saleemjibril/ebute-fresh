@@ -1,0 +1,12 @@
+  time   session
+  0.00s   A   BEGIN ISOLATION LEVEL READ COMMITTED
+  0.01s   A   first read: 65 crates of grade A tomato
+  1.01s   B   confirm_order(8) committed: 20 crates of grade A tomato taken
+  2.01s   A   second read: 45 crates of grade A tomato
+  2.01s   A   COMMIT. The two reads in one transaction disagree (non-repeatable read).
+  2.51s   A   BEGIN ISOLATION LEVEL REPEATABLE READ
+  2.51s   A   first read: 45 crates of grade A tomato
+  3.53s   B   confirm_order(9) committed: 15 crates of grade A tomato taken
+  4.51s   A   second read: 45 crates of grade A tomato
+  4.51s   A   COMMIT. Both reads saw the same snapshot.
+  4.51s   A   new transaction, read again: 30 crates of grade A tomato
