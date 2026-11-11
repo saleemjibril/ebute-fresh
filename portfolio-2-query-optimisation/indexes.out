@@ -1,0 +1,23 @@
+Timing is on.
+CREATE INDEX
+Time: 81.015 ms
+CREATE INDEX
+Time: 133.417 ms
+CREATE INDEX
+Time: 457.295 ms
+CREATE INDEX
+Time: 51.483 ms
+ANALYZE
+Time: 164.069 ms
+Timing is off.
+        index_name        | table_name  |  size   
+--------------------------+-------------+---------
+ allocation_pkey          | allocation  | 48 MB
+ allocation_lot_idx       | allocation  | 18 MB
+ produce_lot_pkey         | produce_lot | 33 MB
+ produce_lot_farmer_idx   | produce_lot | 4416 kB
+ produce_lot_in_stock_idx | produce_lot | 96 kB
+ sales_order_pkey         | sales_order | 5432 kB
+ sales_order_delivery_idx | sales_order | 1744 kB
+(7 rows)
+

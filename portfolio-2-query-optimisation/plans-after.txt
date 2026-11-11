@@ -1,0 +1,275 @@
+Plans captured 2026-11-11 11:13
+
+  tablename  |                 indexname                  |                                                               indexdef                                                               
+-------------+--------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------
+ allocation  | allocation_lot_idx                         | CREATE INDEX allocation_lot_idx ON public.allocation USING btree (lot_id)
+ allocation  | allocation_pkey                            | CREATE UNIQUE INDEX allocation_pkey ON public.allocation USING btree (order_id, line_no, lot_id)
+ order_line  | order_line_order_id_commodity_id_grade_key | CREATE UNIQUE INDEX order_line_order_id_commodity_id_grade_key ON public.order_line USING btree (order_id, commodity_id, grade)
+ order_line  | order_line_pkey                            | CREATE UNIQUE INDEX order_line_pkey ON public.order_line USING btree (order_id, line_no)
+ produce_lot | produce_lot_farmer_idx                     | CREATE INDEX produce_lot_farmer_idx ON public.produce_lot USING btree (farmer_id)
+ produce_lot | produce_lot_in_stock_idx                   | CREATE INDEX produce_lot_in_stock_idx ON public.produce_lot USING btree (commodity_id, grade, received_at) WHERE (qty_remaining > 0)
+ produce_lot | produce_lot_pkey                           | CREATE UNIQUE INDEX produce_lot_pkey ON public.produce_lot USING btree (lot_id)
+ sales_order | sales_order_delivery_idx                   | CREATE INDEX sales_order_delivery_idx ON public.sales_order USING btree (delivery_date)
+ sales_order | sales_order_pkey                           | CREATE UNIQUE INDEX sales_order_pkey ON public.sales_order USING btree (order_id)
+(9 rows)
+
+
+==== Q1. Grade A tomato in stock, oldest first (sales desk) ====
+                                                                           QUERY PLAN                                                                           
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.28..41.03 rows=10 width=32) (actual time=0.040..0.063 rows=10 loops=1)
+   Buffers: shared hit=17
+   ->  Nested Loop  (cost=0.28..717.55 rows=176 width=32) (actual time=0.040..0.061 rows=10 loops=1)
+         Join Filter: (cc.centre_id = l.centre_id)
+         Rows Removed by Join Filter: 4
+         Buffers: shared hit=17
+         ->  Nested Loop  (cost=0.28..703.72 rows=176 width=24) (actual time=0.029..0.047 rows=10 loops=1)
+               Buffers: shared hit=16
+               ->  Index Scan using produce_lot_in_stock_idx on produce_lot l  (cost=0.28..700.42 rows=176 width=24) (actual time=0.022..0.037 rows=10 loops=1)
+                     Index Cond: ((commodity_id = 1) AND ((grade)::bpchar = 'A'::bpchar))
+                     Buffers: shared hit=15
+               ->  Materialize  (cost=0.00..1.10 rows=1 width=4) (actual time=0.001..0.001 rows=1 loops=10)
+                     Buffers: shared hit=1
+                     ->  Seq Scan on commodity c  (cost=0.00..1.10 rows=1 width=4) (actual time=0.005..0.006 rows=1 loops=1)
+                           Filter: (commodity_id = 1)
+                           Rows Removed by Filter: 7
+                           Buffers: shared hit=1
+         ->  Materialize  (cost=0.00..1.07 rows=5 width=10) (actual time=0.001..0.001 rows=1 loops=10)
+               Buffers: shared hit=1
+               ->  Seq Scan on collection_centre cc  (cost=0.00..1.05 rows=5 width=10) (actual time=0.004..0.004 rows=4 loops=1)
+                     Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=353
+ Planning Time: 0.670 ms
+ Execution Time: 0.086 ms
+(25 rows)
+
+
+==== Q2. Unpaid lots for farmer 124 (finance, Friday payout run) ====
+                                                                        QUERY PLAN                                                                        
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=49.80..49.81 rows=3 width=68) (actual time=0.036..0.036 rows=2 loops=1)
+   Sort Key: l.received_at
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=10
+   ->  Nested Loop  (cost=0.42..49.78 rows=3 width=68) (actual time=0.026..0.028 rows=2 loops=1)
+         Join Filter: (c.commodity_id = l.commodity_id)
+         Rows Removed by Join Filter: 14
+         Buffers: shared hit=7
+         ->  Seq Scan on commodity c  (cost=0.00..1.08 rows=8 width=10) (actual time=0.001..0.002 rows=8 loops=1)
+               Buffers: shared hit=1
+         ->  Materialize  (cost=0.42..48.33 rows=3 width=30) (actual time=0.001..0.002 rows=2 loops=8)
+               Buffers: shared hit=6
+               ->  Index Scan using produce_lot_farmer_idx on produce_lot l  (cost=0.42..48.32 rows=3 width=30) (actual time=0.010..0.016 rows=2 loops=1)
+                     Index Cond: (farmer_id = 124)
+                     Filter: (payout_id IS NULL)
+                     Rows Removed by Filter: 32
+                     Buffers: shared hit=6
+ Planning:
+   Buffers: shared hit=22
+ Planning Time: 0.086 ms
+ Execution Time: 0.043 ms
+(21 rows)
+
+
+==== Q3. Trace order 240965 back to the farmers who supplied it ====
+                                                                             QUERY PLAN                                                                              
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Incremental Sort  (cost=29.24..84.74 rows=6 width=68) (actual time=0.129..0.130 rows=10 loops=1)
+   Sort Key: ol.line_no, l.lot_id
+   Presorted Key: ol.line_no
+   Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+   Buffers: shared hit=102
+   ->  Nested Loop  (cost=1.56..84.57 rows=6 width=68) (actual time=0.043..0.119 rows=10 loops=1)
+         Join Filter: (cc.centre_id = l.centre_id)
+         Rows Removed by Join Filter: 15
+         Buffers: shared hit=96
+         ->  Nested Loop  (cost=1.56..83.06 rows=6 width=46) (actual time=0.040..0.112 rows=10 loops=1)
+               Buffers: shared hit=95
+               ->  Nested Loop  (cost=1.27..81.22 rows=6 width=38) (actual time=0.033..0.068 rows=10 loops=1)
+                     Buffers: shared hit=65
+                     ->  Nested Loop  (cost=0.85..30.57 rows=6 width=24) (actual time=0.025..0.035 rows=10 loops=1)
+                           Buffers: shared hit=25
+                           ->  Nested Loop  (cost=0.42..13.66 rows=2 width=20) (actual time=0.015..0.020 rows=4 loops=1)
+                                 Join Filter: (ol.commodity_id = c.commodity_id)
+                                 Rows Removed by Join Filter: 10
+                                 Buffers: shared hit=9
+                                 ->  Index Scan using order_line_pkey on order_line ol  (cost=0.42..12.32 rows=2 width=14) (actual time=0.012..0.014 rows=4 loops=1)
+                                       Index Cond: (order_id = 240965)
+                                       Buffers: shared hit=8
+                                 ->  Materialize  (cost=0.00..1.12 rows=8 width=10) (actual time=0.001..0.001 rows=4 loops=4)
+                                       Buffers: shared hit=1
+                                       ->  Seq Scan on commodity c  (cost=0.00..1.08 rows=8 width=10) (actual time=0.002..0.002 rows=6 loops=1)
+                                             Buffers: shared hit=1
+                           ->  Index Scan using allocation_pkey on allocation a  (cost=0.42..8.45 rows=1 width=22) (actual time=0.003..0.003 rows=2 loops=4)
+                                 Index Cond: ((order_id = 240965) AND (line_no = ol.line_no))
+                                 Buffers: shared hit=16
+                     ->  Index Scan using produce_lot_pkey on produce_lot l  (cost=0.42..8.44 rows=1 width=22) (actual time=0.003..0.003 rows=1 loops=10)
+                           Index Cond: (lot_id = a.lot_id)
+                           Buffers: shared hit=40
+               ->  Index Scan using farmer_pkey on farmer f  (cost=0.29..0.31 rows=1 width=16) (actual time=0.004..0.004 rows=1 loops=10)
+                     Index Cond: (farmer_id = l.farmer_id)
+                     Buffers: shared hit=30
+         ->  Materialize  (cost=0.00..1.07 rows=5 width=10) (actual time=0.000..0.000 rows=2 loops=10)
+               Buffers: shared hit=1
+               ->  Seq Scan on collection_centre cc  (cost=0.00..1.05 rows=5 width=10) (actual time=0.001..0.001 rows=4 loops=1)
+                     Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=275
+ Planning Time: 0.874 ms
+ Execution Time: 0.156 ms
+(43 rows)
+
+
+==== Q4. Recall: who received tomatoes from farmer 1370, 1 to 15 October 2026 ====
+                                                                                              QUERY PLAN                                                                                               
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=62.53..62.53 rows=2 width=57) (actual time=0.073..0.074 rows=4 loops=1)
+   Sort Key: o.delivery_date, cu.business_name
+   Sort Method: quicksort  Memory: 25kB
+   Buffers: shared hit=52
+   ->  Nested Loop  (cost=1.55..62.52 rows=2 width=57) (actual time=0.033..0.065 rows=4 loops=1)
+         Buffers: shared hit=46
+         ->  Nested Loop  (cost=1.27..61.92 rows=2 width=28) (actual time=0.026..0.050 rows=4 loops=1)
+               Buffers: shared hit=34
+               ->  Nested Loop  (cost=0.85..61.02 rows=2 width=20) (actual time=0.019..0.033 rows=4 loops=1)
+                     Buffers: shared hit=18
+                     ->  Index Scan using produce_lot_farmer_idx on produce_lot l  (cost=0.42..48.54 rows=1 width=8) (actual time=0.009..0.010 rows=3 loops=1)
+                           Index Cond: (farmer_id = 1370)
+                           Filter: ((received_at >= '2026-10-01 00:00:00+01'::timestamp with time zone) AND (received_at < '2026-10-16 00:00:00+01'::timestamp with time zone) AND (commodity_id = 1))
+                           Rows Removed by Filter: 30
+                           Buffers: shared hit=5
+                     ->  Index Scan using allocation_lot_idx on allocation a  (cost=0.42..12.46 rows=2 width=20) (actual time=0.006..0.007 rows=1 loops=3)
+                           Index Cond: (lot_id = l.lot_id)
+                           Buffers: shared hit=13
+               ->  Index Scan using sales_order_pkey on sales_order o  (cost=0.42..0.45 rows=1 width=16) (actual time=0.004..0.004 rows=1 loops=4)
+                     Index Cond: (order_id = a.order_id)
+                     Buffers: shared hit=16
+         ->  Index Scan using customer_pkey on customer cu  (cost=0.28..0.30 rows=1 width=37) (actual time=0.003..0.003 rows=1 loops=4)
+               Index Cond: (customer_id = o.customer_id)
+               Buffers: shared hit=12
+ Planning:
+   Buffers: shared hit=154
+ Planning Time: 0.501 ms
+ Execution Time: 0.083 ms
+(28 rows)
+
+
+==== Q5. Sales and margin by month, commodity and source state, July to September 2026 ====
+                                                                                                            QUERY PLAN                                                                                                            
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=51835.32..64285.45 rows=34608 width=89) (actual time=172.242..185.709 rows=36 loops=1)
+   Group Key: ((date_trunc('month'::text, (o.delivery_date)::timestamp with time zone))::date), c.commodity_name, s.state_name
+   Buffers: shared hit=15281 read=16383
+   ->  Gather Merge  (cost=51835.32..62122.45 rows=69216 width=89) (actual time=171.869..185.621 rows=108 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=15281 read=16383
+         ->  Partial GroupAggregate  (cost=50835.30..53133.18 rows=34608 width=89) (actual time=154.919..168.502 rows=36 loops=3)
+               Group Key: ((date_trunc('month'::text, (o.delivery_date)::timestamp with time zone))::date), c.commodity_name, s.state_name
+               Buffers: shared hit=15281 read=16383
+               ->  Sort  (cost=50835.30..50961.90 rows=50640 width=33) (actual time=154.560..155.912 rows=41748 loops=3)
+                     Sort Key: ((date_trunc('month'::text, (o.delivery_date)::timestamp with time zone))::date), c.commodity_name, s.state_name
+                     Sort Method: quicksort  Memory: 3726kB
+                     Buffers: shared hit=15281 read=16383
+                     Worker 0:  Sort Method: quicksort  Memory: 3743kB
+                     Worker 1:  Sort Method: quicksort  Memory: 3721kB
+                     ->  Hash Join  (cost=22639.46..46878.29 rows=50640 width=33) (actual time=77.649..138.070 rows=41748 loops=3)
+                           Hash Cond: (cc.state_code = s.state_code)
+                           Buffers: shared hit=15249 read=16383
+                           ->  Hash Join  (cost=22638.32..46270.53 rows=50640 width=31) (actual time=77.596..127.119 rows=41748 loops=3)
+                                 Hash Cond: (l.centre_id = cc.centre_id)
+                                 Buffers: shared hit=15216 read=16383
+                                 ->  Parallel Hash Join  (cost=22637.21..46023.82 rows=50640 width=30) (actual time=77.550..123.394 rows=41748 loops=3)
+                                       Hash Cond: (l.lot_id = a.lot_id)
+                                       Buffers: shared hit=15185 read=16383
+                                       ->  Parallel Seq Scan on produce_lot l  (cost=0.00..22238.08 rows=250008 width=16) (actual time=3.375..18.334 rows=200006 loops=3)
+                                             Buffers: shared hit=3355 read=16383
+                                       ->  Parallel Hash  (cost=22004.21..22004.21 rows=50640 width=30) (actual time=73.783..73.787 rows=41748 loops=3)
+                                             Buckets: 131072  Batches: 1  Memory Usage: 9280kB
+                                             Buffers: shared hit=11800
+                                             ->  Parallel Hash Join  (cost=7815.17..22004.21 rows=50640 width=30) (actual time=25.740..66.988 rows=41748 loops=3)
+                                                   Hash Cond: ((a.order_id = ol.order_id) AND (a.line_no = ol.line_no))
+                                                   Buffers: shared hit=11800
+                                                   ->  Parallel Seq Scan on allocation a  (cost=0.00..10938.28 rows=395628 width=22) (actual time=0.008..12.873 rows=316503 loops=3)
+                                                         Buffers: shared hit=6982
+                                                   ->  Parallel Hash  (cost=7375.89..7375.89 rows=29285 width=36) (actual time=25.671..25.673 rows=16705 loops=3)
+                                                         Buckets: 65536  Batches: 1  Memory Usage: 4384kB
+                                                         Buffers: shared hit=4818
+                                                         ->  Hash Join  (cost=1509.84..7375.89 rows=29285 width=36) (actual time=8.940..22.644 rows=16705 loops=3)
+                                                               Hash Cond: (ol.commodity_id = c.commodity_id)
+                                                               Buffers: shared hit=4818
+                                                               ->  Hash Join  (cost=1508.66..7257.11 rows=29285 width=30) (actual time=8.909..21.298 rows=16705 loops=3)
+                                                                     Hash Cond: (ol.order_id = o.order_id)
+                                                                     Buffers: shared hit=4815
+                                                                     ->  Parallel Seq Scan on order_line ol  (cost=0.00..5147.87 rows=228787 width=18) (actual time=0.004..5.356 rows=129646 loops=3)
+                                                                           Buffers: shared hit=2860
+                                                                     ->  Hash  (cost=1113.78..1113.78 rows=31591 width=12) (actual time=5.856..5.857 rows=31349 loops=3)
+                                                                           Buckets: 32768  Batches: 1  Memory Usage: 1726kB
+                                                                           Buffers: shared hit=1955
+                                                                           ->  Index Scan using sales_order_delivery_idx on sales_order o  (cost=0.29..1113.78 rows=31591 width=12) (actual time=0.013..3.749 rows=31349 loops=3)
+                                                                                 Index Cond: ((delivery_date >= '2026-07-01'::date) AND (delivery_date < '2026-10-01'::date))
+                                                                                 Filter: ((status)::text = 'delivered'::text)
+                                                                                 Rows Removed by Filter: 617
+                                                                                 Buffers: shared hit=1955
+                                                               ->  Hash  (cost=1.08..1.08 rows=8 width=10) (actual time=0.026..0.026 rows=8 loops=3)
+                                                                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                                     Buffers: shared hit=3
+                                                                     ->  Seq Scan on commodity c  (cost=0.00..1.08 rows=8 width=10) (actual time=0.023..0.023 rows=8 loops=3)
+                                                                           Buffers: shared hit=3
+                                 ->  Hash  (cost=1.05..1.05 rows=5 width=5) (actual time=0.027..0.027 rows=5 loops=3)
+                                       Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                       Buffers: shared hit=3
+                                       ->  Seq Scan on collection_centre cc  (cost=0.00..1.05 rows=5 width=5) (actual time=0.023..0.024 rows=5 loops=3)
+                                             Buffers: shared hit=3
+                           ->  Hash  (cost=1.06..1.06 rows=6 width=8) (actual time=0.028..0.028 rows=6 loops=3)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                 Buffers: shared hit=3
+                                 ->  Seq Scan on state s  (cost=0.00..1.06 rows=6 width=8) (actual time=0.025..0.025 rows=6 loops=3)
+                                       Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=216
+ Planning Time: 1.129 ms
+ Execution Time: 185.844 ms
+(73 rows)
+
+
+==== Q6. Stock reaching best-before in the next two days, as at 10 November 2026 ====
+                                                                                           QUERY PLAN                                                                                           
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=6960.73..6961.40 rows=271 width=38) (actual time=1.642..1.648 rows=300 loops=1)
+   Sort Key: (((l.received_at)::date + (c.shelf_life_days)::integer)), l.lot_id
+   Sort Method: quicksort  Memory: 45kB
+   Buffers: shared hit=820
+   ->  Nested Loop  (cost=62.41..6949.77 rows=271 width=38) (actual time=0.161..1.582 rows=300 loops=1)
+         Buffers: shared hit=820
+         ->  Hash Join  (cost=62.27..6939.92 rows=271 width=34) (actual time=0.157..1.504 rows=300 loops=1)
+               Hash Cond: (l.commodity_id = c.commodity_id)
+               Join Filter: ((((l.received_at)::date + (c.shelf_life_days)::integer) >= '2026-11-10'::date) AND (((l.received_at)::date + (c.shelf_life_days)::integer) <= '2026-11-12'::date))
+               Rows Removed by Join Filter: 2293
+               Buffers: shared hit=812
+               ->  Bitmap Heap Scan on produce_lot l  (cost=61.09..6931.28 rows=2440 width=26) (actual time=0.143..0.959 rows=2593 loops=1)
+                     Recheck Cond: (qty_remaining > 0)
+                     Heap Blocks: exact=800
+                     Buffers: shared hit=811
+                     ->  Bitmap Index Scan on produce_lot_in_stock_idx  (cost=0.00..60.48 rows=2440 width=0) (actual time=0.094..0.094 rows=2593 loops=1)
+                           Buffers: shared hit=11
+               ->  Hash  (cost=1.08..1.08 rows=8 width=12) (actual time=0.005..0.005 rows=8 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on commodity c  (cost=0.00..1.08 rows=8 width=12) (actual time=0.003..0.003 rows=8 loops=1)
+                           Buffers: shared hit=1
+         ->  Memoize  (cost=0.14..0.16 rows=1 width=10) (actual time=0.000..0.000 rows=1 loops=300)
+               Cache Key: l.centre_id
+               Cache Mode: logical
+               Hits: 296  Misses: 4  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+               Buffers: shared hit=8
+               ->  Index Scan using collection_centre_pkey on collection_centre cc  (cost=0.13..0.15 rows=1 width=10) (actual time=0.001..0.001 rows=1 loops=4)
+                     Index Cond: (centre_id = l.centre_id)
+                     Buffers: shared hit=8
+ Planning:
+   Buffers: shared hit=11
+ Planning Time: 0.156 ms
+ Execution Time: 1.671 ms
+(34 rows)
+
