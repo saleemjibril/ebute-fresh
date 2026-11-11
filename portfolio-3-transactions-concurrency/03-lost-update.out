@@ -1,0 +1,11 @@
+  time   session
+  0.00s   A   BEGIN (read committed)
+  0.01s   A   reads lot 14: 25 crates left
+  0.51s   B   BEGIN (read committed)
+  0.54s   B   reads lot 14: 25 crates left
+  1.04s   A   allocates 20 crates to order 8, sets lot 14 to 5
+  1.04s   A   COMMIT
+  1.56s   B   allocates 15 crates to order 9, sets lot 14 to 10
+  1.56s   B   COMMIT
+  1.87s   B   RESULT lot 14: received 50, allocated in total 60, qty_remaining says 10
+  1.87s   B   RESULT 60 crates promised from a 50-crate lot. 10 crates oversold, and the CHECK constraint did not notice because 10 is a valid number.
