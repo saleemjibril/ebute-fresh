@@ -1,0 +1,398 @@
+
+==== Q1. Grade A tomato in stock, oldest first (sales desk) ====
+ lot_id | centre_name | qty_remaining |          received_at          | best_before 
+--------+-------------+---------------+-------------------------------+-------------
+ 597448 | Kadawa      |            42 | 2026-10-29 06:05:47.498735+01 | 2026-11-05
+ 597454 | Bukuru      |            44 | 2026-10-29 06:08:37.730846+01 | 2026-11-05
+ 597501 | Kadawa      |            52 | 2026-10-29 06:42:36.779509+01 | 2026-11-05
+ 597502 | Kadawa      |            58 | 2026-10-29 06:43:59.033158+01 | 2026-11-05
+ 597506 | Kadawa      |            62 | 2026-10-29 06:46:26.285479+01 | 2026-11-05
+ 597520 | Kadawa      |            49 | 2026-10-29 06:51:21.058656+01 | 2026-11-05
+ 597552 | Kadawa      |            37 | 2026-10-29 07:04:42.621894+01 | 2026-11-05
+ 597578 | Ogbomoso    |            15 | 2026-10-29 07:22:52.943383+01 | 2026-11-05
+ 597608 | Kadawa      |            55 | 2026-10-29 07:35:02.716468+01 | 2026-11-05
+ 597620 | Kadawa      |            56 | 2026-10-29 07:41:33.174845+01 | 2026-11-05
+(10 rows)
+
+
+==== Q2. Unpaid lots for farmer 124 (finance, Friday payout run) ====
+ lot_id | commodity_name | grade | qty_received | farm_gate_price | amount_due |          received_at          
+--------+----------------+-------+--------------+-----------------+------------+-------------------------------
+ 598556 | Irish potato   | B     |           29 |        28600.00 |  829400.00 | 2026-10-30 08:31:48.264489+01
+ 599922 | Cabbage        | B     |           35 |        10600.00 |  371000.00 | 2026-10-31 13:57:47.333123+01
+(2 rows)
+
+
+==== Q3. Trace order 240965 back to the farmers who supplied it ====
+ line_no | commodity_name | grade | quantity | lot_id |  received  |      farmer       | centre_name 
+---------+----------------+-------+----------+--------+------------+-------------------+-------------
+       1 | Irish potato   | C     |       24 | 583097 | 2026-10-12 | Pam Pam           | Bukuru
+       2 | Scotch bonnet  | B     |       16 | 583264 | 2026-10-12 | Funmilayo Oladejo | Ogbomoso
+       2 | Scotch bonnet  | B     |       10 | 583275 | 2026-10-12 | Hadiza Ibrahim    | Kadawa
+       3 | Tomato         | A     |       36 | 583308 | 2026-10-12 | Rabi Garba        | Kadawa
+       3 | Tomato         | A     |       55 | 583312 | 2026-10-12 | Aminu Danjuma     | Kadawa
+       3 | Tomato         | A     |       43 | 583326 | 2026-10-12 | Bitrus Gyang      | Bukuru
+       3 | Tomato         | A     |        4 | 583335 | 2026-10-12 | Funmilayo Oladejo | Ogbomoso
+       4 | Yam            | C     |      366 | 583096 | 2026-10-12 | Aondona Akaa      | Zaki Biam
+       4 | Yam            | C     |      194 | 583137 | 2026-10-12 | Bukola Ogunleye   | Ogbomoso
+       4 | Yam            | C     |      231 | 583192 | 2026-10-12 | Orduen Ugba       | Zaki Biam
+(10 rows)
+
+
+==== Q4. Recall: who received tomatoes from farmer 1370, 1 to 15 October 2026 ====
+    business_name    |     phone      | order_id | delivery_date | lot_id | quantity 
+---------------------+----------------+----------+---------------+--------+----------
+ Unity Eatery 365    | +2349000000365 |   237343 | 2026-10-03    | 573968 |       55
+ Divine Kitchen 2985 | +2349000002985 |   238093 | 2026-10-04    | 574832 |        9
+ Grace Events 2065   | +2349000002065 |   238030 | 2026-10-04    | 574832 |       52
+ Grace Kitchen 392   | +2349000000392 |   239530 | 2026-10-08    | 578274 |       58
+(4 rows)
+
+
+==== Q5. Sales and margin by month, commodity and source state, July to September 2026 ====
+   month    | commodity_name | state_name |  units  |    revenue    |    margin     
+------------+----------------+------------+---------+---------------+---------------
+ 2026-07-01 | Cabbage        | Plateau    |   22973 |  392971700.00 |  148640750.00
+ 2026-07-01 | Carrot         | Plateau    |   22766 |  539588900.00 |  201374900.00
+ 2026-07-01 | Irish potato   | Plateau    |   45206 | 1978443950.00 |  739759050.00
+ 2026-07-01 | Onion          | Kano       |   42027 | 4026598200.00 | 1510741400.00
+ 2026-07-01 | Plantain       | Ogun       |  341141 | 2312595950.00 |  869663250.00
+ 2026-07-01 | Scotch bonnet  | Kano       |   43029 | 1604555050.00 |  603536000.00
+ 2026-07-01 | Scotch bonnet  | Oyo        |   28965 | 1069894150.00 |  401489350.00
+ 2026-07-01 | Tomato         | Kano       |  177905 | 5371357200.00 | 2009912450.00
+ 2026-07-01 | Tomato         | Oyo        |   57970 | 1761968850.00 |  661411650.00
+ 2026-07-01 | Tomato         | Plateau    |   51641 | 1554126400.00 |  585556050.00
+ 2026-07-01 | Yam            | Benue      | 1745184 | 5939796850.00 | 2230834700.00
+ 2026-07-01 | Yam            | Oyo        |  460947 | 1546897600.00 |  579984850.00
+ 2026-08-01 | Cabbage        | Plateau    |   23424 |  409033700.00 |  152990000.00
+ 2026-08-01 | Carrot         | Plateau    |   20837 |  508658650.00 |  192277250.00
+ 2026-08-01 | Irish potato   | Plateau    |   43104 | 1934211550.00 |  725856350.00
+ 2026-08-01 | Onion          | Kano       |   40751 | 3979713250.00 | 1502001400.00
+ 2026-08-01 | Plantain       | Ogun       |  336282 | 2322492750.00 |  872207500.00
+ 2026-08-01 | Scotch bonnet  | Kano       |   42755 | 1622725000.00 |  607691200.00
+ 2026-08-01 | Scotch bonnet  | Oyo        |   28031 | 1069643250.00 |  400403200.00
+ 2026-08-01 | Tomato         | Kano       |  170506 | 5301379450.00 | 1992002400.00
+ 2026-08-01 | Tomato         | Oyo        |   54893 | 1708001050.00 |  643637900.00
+ 2026-08-01 | Tomato         | Plateau    |   46681 | 1436420850.00 |  537809750.00
+ 2026-08-01 | Yam            | Benue      | 1764498 | 6091603550.00 | 2287733650.00
+ 2026-08-01 | Yam            | Oyo        |  450785 | 1556943900.00 |  583180600.00
+ 2026-09-01 | Cabbage        | Plateau    |   21676 |  384444450.00 |  144566750.00
+ 2026-09-01 | Carrot         | Plateau    |   22680 |  562831950.00 |  210396500.00
+ 2026-09-01 | Irish potato   | Plateau    |   42305 | 1930787200.00 |  726143850.00
+ 2026-09-01 | Onion          | Kano       |   39771 | 3938588250.00 | 1485087500.00
+ 2026-09-01 | Plantain       | Ogun       |  326420 | 2309237600.00 |  868149150.00
+ 2026-09-01 | Scotch bonnet  | Kano       |   41031 | 1596973300.00 |  598327400.00
+ 2026-09-01 | Scotch bonnet  | Oyo        |   26619 | 1030179400.00 |  388533000.00
+ 2026-09-01 | Tomato         | Kano       |  165310 | 5221045600.00 | 1962631150.00
+ 2026-09-01 | Tomato         | Oyo        |   54639 | 1724371300.00 |  645451100.00
+ 2026-09-01 | Tomato         | Plateau    |   43338 | 1371621750.00 |  513726600.00
+ 2026-09-01 | Yam            | Benue      | 1711493 | 6030211050.00 | 2254997650.00
+ 2026-09-01 | Yam            | Oyo        |  427638 | 1501815950.00 |  564511650.00
+(36 rows)
+
+
+==== Q6. Stock reaching best-before in the next two days, as at 10 November 2026 ====
+ lot_id | commodity_name | grade | centre_name | qty_remaining |  received  | best_before 
+--------+----------------+-------+-------------+---------------+------------+-------------
+ 599182 | Plantain       | B     | Ijebu-Ode   |            20 | 2026-10-31 | 2026-11-10
+ 599183 | Plantain       | B     | Ijebu-Ode   |            65 | 2026-10-31 | 2026-11-10
+ 599184 | Scotch bonnet  | C     | Kadawa      |            11 | 2026-10-31 | 2026-11-10
+ 599185 | Plantain       | A     | Ijebu-Ode   |            44 | 2026-10-31 | 2026-11-10
+ 599187 | Scotch bonnet  | A     | Kadawa      |            20 | 2026-10-31 | 2026-11-10
+ 599189 | Plantain       | C     | Ijebu-Ode   |           100 | 2026-10-31 | 2026-11-10
+ 599191 | Plantain       | B     | Ijebu-Ode   |            69 | 2026-10-31 | 2026-11-10
+ 599194 | Scotch bonnet  | A     | Ogbomoso    |            16 | 2026-10-31 | 2026-11-10
+ 599196 | Plantain       | C     | Ijebu-Ode   |            89 | 2026-10-31 | 2026-11-10
+ 599199 | Plantain       | C     | Ijebu-Ode   |            44 | 2026-10-31 | 2026-11-10
+ 599202 | Plantain       | A     | Ijebu-Ode   |           117 | 2026-10-31 | 2026-11-10
+ 599203 | Scotch bonnet  | B     | Kadawa      |            36 | 2026-10-31 | 2026-11-10
+ 599206 | Scotch bonnet  | B     | Ogbomoso    |             8 | 2026-10-31 | 2026-11-10
+ 599211 | Scotch bonnet  | B     | Kadawa      |            39 | 2026-10-31 | 2026-11-10
+ 599212 | Plantain       | A     | Ijebu-Ode   |            57 | 2026-10-31 | 2026-11-10
+ 599218 | Scotch bonnet  | B     | Ogbomoso    |            39 | 2026-10-31 | 2026-11-10
+ 599220 | Plantain       | C     | Ijebu-Ode   |           119 | 2026-10-31 | 2026-11-10
+ 599222 | Scotch bonnet  | A     | Kadawa      |            18 | 2026-10-31 | 2026-11-10
+ 599224 | Plantain       | C     | Ijebu-Ode   |            28 | 2026-10-31 | 2026-11-10
+ 599227 | Scotch bonnet  | C     | Kadawa      |            29 | 2026-10-31 | 2026-11-10
+ 599232 | Scotch bonnet  | B     | Kadawa      |            27 | 2026-10-31 | 2026-11-10
+ 599237 | Plantain       | C     | Ijebu-Ode   |            34 | 2026-10-31 | 2026-11-10
+ 599239 | Plantain       | B     | Ijebu-Ode   |            99 | 2026-10-31 | 2026-11-10
+ 599240 | Plantain       | C     | Ijebu-Ode   |            72 | 2026-10-31 | 2026-11-10
+ 599241 | Scotch bonnet  | B     | Ogbomoso    |            21 | 2026-10-31 | 2026-11-10
+ 599244 | Scotch bonnet  | C     | Kadawa      |            14 | 2026-10-31 | 2026-11-10
+ 599248 | Plantain       | B     | Ijebu-Ode   |            39 | 2026-10-31 | 2026-11-10
+ 599251 | Scotch bonnet  | B     | Ogbomoso    |            10 | 2026-10-31 | 2026-11-10
+ 599257 | Plantain       | C     | Ijebu-Ode   |            41 | 2026-10-31 | 2026-11-10
+ 599260 | Scotch bonnet  | A     | Ogbomoso    |            16 | 2026-10-31 | 2026-11-10
+ 599264 | Plantain       | B     | Ijebu-Ode   |            35 | 2026-10-31 | 2026-11-10
+ 599268 | Scotch bonnet  | B     | Ogbomoso    |            33 | 2026-10-31 | 2026-11-10
+ 599269 | Plantain       | A     | Ijebu-Ode   |           111 | 2026-10-31 | 2026-11-10
+ 599272 | Scotch bonnet  | B     | Kadawa      |            23 | 2026-10-31 | 2026-11-10
+ 599273 | Scotch bonnet  | B     | Ogbomoso    |            12 | 2026-10-31 | 2026-11-10
+ 599279 | Plantain       | B     | Ijebu-Ode   |            89 | 2026-10-31 | 2026-11-10
+ 599280 | Plantain       | C     | Ijebu-Ode   |            63 | 2026-10-31 | 2026-11-10
+ 599281 | Plantain       | C     | Ijebu-Ode   |            63 | 2026-10-31 | 2026-11-10
+ 599283 | Plantain       | A     | Ijebu-Ode   |            93 | 2026-10-31 | 2026-11-10
+ 599286 | Scotch bonnet  | B     | Kadawa      |            16 | 2026-10-31 | 2026-11-10
+ 599290 | Plantain       | B     | Ijebu-Ode   |            70 | 2026-10-31 | 2026-11-10
+ 599292 | Plantain       | C     | Ijebu-Ode   |            54 | 2026-10-31 | 2026-11-10
+ 599293 | Plantain       | A     | Ijebu-Ode   |            69 | 2026-10-31 | 2026-11-10
+ 599294 | Scotch bonnet  | B     | Kadawa      |            32 | 2026-10-31 | 2026-11-10
+ 599295 | Scotch bonnet  | A     | Kadawa      |             7 | 2026-10-31 | 2026-11-10
+ 599297 | Plantain       | C     | Ijebu-Ode   |            44 | 2026-10-31 | 2026-11-10
+ 599298 | Scotch bonnet  | A     | Ogbomoso    |            34 | 2026-10-31 | 2026-11-10
+ 599304 | Plantain       | A     | Ijebu-Ode   |            43 | 2026-10-31 | 2026-11-10
+ 599305 | Plantain       | B     | Ijebu-Ode   |            24 | 2026-10-31 | 2026-11-10
+ 599312 | Scotch bonnet  | A     | Kadawa      |            13 | 2026-10-31 | 2026-11-10
+ 599315 | Plantain       | A     | Ijebu-Ode   |            97 | 2026-10-31 | 2026-11-10
+ 599328 | Scotch bonnet  | C     | Kadawa      |            33 | 2026-10-31 | 2026-11-10
+ 599338 | Scotch bonnet  | C     | Kadawa      |             9 | 2026-10-31 | 2026-11-10
+ 599339 | Plantain       | B     | Ijebu-Ode   |            23 | 2026-10-31 | 2026-11-10
+ 599342 | Scotch bonnet  | B     | Ogbomoso    |             9 | 2026-10-31 | 2026-11-10
+ 599343 | Scotch bonnet  | B     | Kadawa      |            18 | 2026-10-31 | 2026-11-10
+ 599347 | Plantain       | B     | Ijebu-Ode   |            77 | 2026-10-31 | 2026-11-10
+ 599348 | Plantain       | B     | Ijebu-Ode   |            63 | 2026-10-31 | 2026-11-10
+ 599349 | Scotch bonnet  | A     | Kadawa      |             5 | 2026-10-31 | 2026-11-10
+ 599353 | Scotch bonnet  | B     | Ogbomoso    |            13 | 2026-10-31 | 2026-11-10
+ 599357 | Plantain       | B     | Ijebu-Ode   |            56 | 2026-10-31 | 2026-11-10
+ 599359 | Scotch bonnet  | A     | Kadawa      |            12 | 2026-10-31 | 2026-11-10
+ 599371 | Plantain       | C     | Ijebu-Ode   |            52 | 2026-10-31 | 2026-11-10
+ 599373 | Plantain       | A     | Ijebu-Ode   |            79 | 2026-10-31 | 2026-11-10
+ 599376 | Plantain       | B     | Ijebu-Ode   |            60 | 2026-10-31 | 2026-11-10
+ 599379 | Plantain       | A     | Ijebu-Ode   |            83 | 2026-10-31 | 2026-11-10
+ 599380 | Plantain       | B     | Ijebu-Ode   |           118 | 2026-10-31 | 2026-11-10
+ 599384 | Plantain       | B     | Ijebu-Ode   |            91 | 2026-10-31 | 2026-11-10
+ 599386 | Scotch bonnet  | A     | Kadawa      |            26 | 2026-10-31 | 2026-11-10
+ 599387 | Scotch bonnet  | B     | Ogbomoso    |            13 | 2026-10-31 | 2026-11-10
+ 599394 | Scotch bonnet  | B     | Kadawa      |            37 | 2026-10-31 | 2026-11-10
+ 599395 | Plantain       | B     | Ijebu-Ode   |            50 | 2026-10-31 | 2026-11-10
+ 599396 | Plantain       | A     | Ijebu-Ode   |           106 | 2026-10-31 | 2026-11-10
+ 599399 | Plantain       | A     | Ijebu-Ode   |            30 | 2026-10-31 | 2026-11-10
+ 599400 | Plantain       | A     | Ijebu-Ode   |            31 | 2026-10-31 | 2026-11-10
+ 599402 | Scotch bonnet  | B     | Kadawa      |            14 | 2026-10-31 | 2026-11-10
+ 599404 | Plantain       | B     | Ijebu-Ode   |            73 | 2026-10-31 | 2026-11-10
+ 599405 | Plantain       | B     | Ijebu-Ode   |            21 | 2026-10-31 | 2026-11-10
+ 599410 | Plantain       | B     | Ijebu-Ode   |            86 | 2026-10-31 | 2026-11-10
+ 599418 | Scotch bonnet  | B     | Kadawa      |            27 | 2026-10-31 | 2026-11-10
+ 599420 | Plantain       | B     | Ijebu-Ode   |            38 | 2026-10-31 | 2026-11-10
+ 599431 | Scotch bonnet  | B     | Kadawa      |             7 | 2026-10-31 | 2026-11-10
+ 599433 | Scotch bonnet  | B     | Kadawa      |            25 | 2026-10-31 | 2026-11-10
+ 599438 | Plantain       | B     | Ijebu-Ode   |            28 | 2026-10-31 | 2026-11-10
+ 599445 | Plantain       | A     | Ijebu-Ode   |            97 | 2026-10-31 | 2026-11-10
+ 599446 | Plantain       | A     | Ijebu-Ode   |            32 | 2026-10-31 | 2026-11-10
+ 599447 | Plantain       | C     | Ijebu-Ode   |            50 | 2026-10-31 | 2026-11-10
+ 599449 | Plantain       | B     | Ijebu-Ode   |            51 | 2026-10-31 | 2026-11-10
+ 599452 | Scotch bonnet  | B     | Kadawa      |            37 | 2026-10-31 | 2026-11-10
+ 599454 | Plantain       | B     | Ijebu-Ode   |            61 | 2026-10-31 | 2026-11-10
+ 599457 | Plantain       | B     | Ijebu-Ode   |            79 | 2026-10-31 | 2026-11-10
+ 599463 | Plantain       | C     | Ijebu-Ode   |            30 | 2026-10-31 | 2026-11-10
+ 599464 | Plantain       | A     | Ijebu-Ode   |            87 | 2026-10-31 | 2026-11-10
+ 599470 | Scotch bonnet  | B     | Ogbomoso    |             8 | 2026-10-31 | 2026-11-10
+ 599471 | Plantain       | B     | Ijebu-Ode   |            46 | 2026-10-31 | 2026-11-10
+ 599476 | Plantain       | B     | Ijebu-Ode   |            27 | 2026-10-31 | 2026-11-10
+ 599478 | Plantain       | A     | Ijebu-Ode   |            27 | 2026-10-31 | 2026-11-10
+ 599479 | Scotch bonnet  | A     | Ogbomoso    |             6 | 2026-10-31 | 2026-11-10
+ 599482 | Plantain       | A     | Ijebu-Ode   |            71 | 2026-10-31 | 2026-11-10
+ 599486 | Plantain       | A     | Ijebu-Ode   |            90 | 2026-10-31 | 2026-11-10
+ 599489 | Plantain       | A     | Ijebu-Ode   |            30 | 2026-10-31 | 2026-11-10
+ 599496 | Plantain       | B     | Ijebu-Ode   |            45 | 2026-10-31 | 2026-11-10
+ 599498 | Plantain       | A     | Ijebu-Ode   |            21 | 2026-10-31 | 2026-11-10
+ 599499 | Scotch bonnet  | B     | Ogbomoso    |            19 | 2026-10-31 | 2026-11-10
+ 599504 | Plantain       | B     | Ijebu-Ode   |           114 | 2026-10-31 | 2026-11-10
+ 599505 | Plantain       | C     | Ijebu-Ode   |            88 | 2026-10-31 | 2026-11-10
+ 599510 | Scotch bonnet  | A     | Kadawa      |            29 | 2026-10-31 | 2026-11-10
+ 599515 | Plantain       | B     | Ijebu-Ode   |            68 | 2026-10-31 | 2026-11-10
+ 599518 | Plantain       | B     | Ijebu-Ode   |            43 | 2026-10-31 | 2026-11-10
+ 599522 | Plantain       | C     | Ijebu-Ode   |            58 | 2026-10-31 | 2026-11-10
+ 599528 | Plantain       | B     | Ijebu-Ode   |            81 | 2026-10-31 | 2026-11-10
+ 599529 | Plantain       | A     | Ijebu-Ode   |            60 | 2026-10-31 | 2026-11-10
+ 599532 | Scotch bonnet  | B     | Kadawa      |            33 | 2026-10-31 | 2026-11-10
+ 599536 | Plantain       | C     | Ijebu-Ode   |           112 | 2026-10-31 | 2026-11-10
+ 599539 | Plantain       | B     | Ijebu-Ode   |            61 | 2026-10-31 | 2026-11-10
+ 599543 | Plantain       | A     | Ijebu-Ode   |            43 | 2026-10-31 | 2026-11-10
+ 599550 | Plantain       | B     | Ijebu-Ode   |           106 | 2026-10-31 | 2026-11-10
+ 599551 | Plantain       | B     | Ijebu-Ode   |            64 | 2026-10-31 | 2026-11-10
+ 599552 | Plantain       | A     | Ijebu-Ode   |            44 | 2026-10-31 | 2026-11-10
+ 599554 | Plantain       | B     | Ijebu-Ode   |            50 | 2026-10-31 | 2026-11-10
+ 599556 | Plantain       | B     | Ijebu-Ode   |            93 | 2026-10-31 | 2026-11-10
+ 599559 | Scotch bonnet  | B     | Ogbomoso    |            20 | 2026-10-31 | 2026-11-10
+ 599561 | Plantain       | C     | Ijebu-Ode   |            96 | 2026-10-31 | 2026-11-10
+ 599562 | Plantain       | A     | Ijebu-Ode   |            87 | 2026-10-31 | 2026-11-10
+ 599568 | Plantain       | A     | Ijebu-Ode   |            94 | 2026-10-31 | 2026-11-10
+ 599569 | Plantain       | B     | Ijebu-Ode   |           113 | 2026-10-31 | 2026-11-10
+ 599571 | Scotch bonnet  | C     | Ogbomoso    |            35 | 2026-10-31 | 2026-11-10
+ 599574 | Scotch bonnet  | A     | Ogbomoso    |            21 | 2026-10-31 | 2026-11-10
+ 599576 | Scotch bonnet  | B     | Ogbomoso    |            22 | 2026-10-31 | 2026-11-10
+ 599577 | Scotch bonnet  | B     | Ogbomoso    |            14 | 2026-10-31 | 2026-11-10
+ 599578 | Scotch bonnet  | A     | Kadawa      |            30 | 2026-10-31 | 2026-11-10
+ 599579 | Plantain       | B     | Ijebu-Ode   |            87 | 2026-10-31 | 2026-11-10
+ 599580 | Scotch bonnet  | C     | Ogbomoso    |            26 | 2026-10-31 | 2026-11-10
+ 599584 | Plantain       | B     | Ijebu-Ode   |            46 | 2026-10-31 | 2026-11-10
+ 599588 | Plantain       | C     | Ijebu-Ode   |            66 | 2026-10-31 | 2026-11-10
+ 599594 | Plantain       | C     | Ijebu-Ode   |            21 | 2026-10-31 | 2026-11-10
+ 599598 | Plantain       | A     | Ijebu-Ode   |            51 | 2026-10-31 | 2026-11-10
+ 599600 | Scotch bonnet  | B     | Kadawa      |            27 | 2026-10-31 | 2026-11-10
+ 599601 | Plantain       | A     | Ijebu-Ode   |           111 | 2026-10-31 | 2026-11-10
+ 599606 | Plantain       | C     | Ijebu-Ode   |            32 | 2026-10-31 | 2026-11-10
+ 599608 | Scotch bonnet  | C     | Ogbomoso    |            25 | 2026-10-31 | 2026-11-10
+ 599609 | Plantain       | B     | Ijebu-Ode   |           119 | 2026-10-31 | 2026-11-10
+ 599610 | Scotch bonnet  | B     | Kadawa      |            16 | 2026-10-31 | 2026-11-10
+ 599617 | Scotch bonnet  | C     | Kadawa      |            29 | 2026-10-31 | 2026-11-10
+ 599618 | Plantain       | B     | Ijebu-Ode   |            53 | 2026-10-31 | 2026-11-10
+ 599622 | Plantain       | B     | Ijebu-Ode   |           114 | 2026-10-31 | 2026-11-10
+ 599625 | Plantain       | C     | Ijebu-Ode   |            37 | 2026-10-31 | 2026-11-10
+ 599626 | Plantain       | A     | Ijebu-Ode   |           114 | 2026-10-31 | 2026-11-10
+ 599631 | Scotch bonnet  | B     | Ogbomoso    |             6 | 2026-10-31 | 2026-11-10
+ 599632 | Scotch bonnet  | B     | Ogbomoso    |            34 | 2026-10-31 | 2026-11-10
+ 599633 | Plantain       | B     | Ijebu-Ode   |            42 | 2026-10-31 | 2026-11-10
+ 599636 | Plantain       | B     | Ijebu-Ode   |            27 | 2026-10-31 | 2026-11-10
+ 599638 | Plantain       | A     | Ijebu-Ode   |            58 | 2026-10-31 | 2026-11-10
+ 599640 | Plantain       | C     | Ijebu-Ode   |            49 | 2026-10-31 | 2026-11-10
+ 599644 | Scotch bonnet  | B     | Kadawa      |            20 | 2026-10-31 | 2026-11-10
+ 599645 | Scotch bonnet  | A     | Ogbomoso    |             9 | 2026-10-31 | 2026-11-10
+ 599647 | Scotch bonnet  | B     | Ogbomoso    |             5 | 2026-10-31 | 2026-11-10
+ 599652 | Plantain       | B     | Ijebu-Ode   |            53 | 2026-10-31 | 2026-11-10
+ 599655 | Scotch bonnet  | B     | Kadawa      |            24 | 2026-10-31 | 2026-11-10
+ 599659 | Plantain       | C     | Ijebu-Ode   |            63 | 2026-10-31 | 2026-11-10
+ 599666 | Scotch bonnet  | A     | Ogbomoso    |            17 | 2026-10-31 | 2026-11-10
+ 599670 | Plantain       | B     | Ijebu-Ode   |           102 | 2026-10-31 | 2026-11-10
+ 599671 | Scotch bonnet  | A     | Kadawa      |            20 | 2026-10-31 | 2026-11-10
+ 599673 | Scotch bonnet  | A     | Kadawa      |            12 | 2026-10-31 | 2026-11-10
+ 599674 | Scotch bonnet  | A     | Kadawa      |            17 | 2026-10-31 | 2026-11-10
+ 599676 | Plantain       | A     | Ijebu-Ode   |            73 | 2026-10-31 | 2026-11-10
+ 599679 | Scotch bonnet  | B     | Kadawa      |             6 | 2026-10-31 | 2026-11-10
+ 599685 | Plantain       | B     | Ijebu-Ode   |            47 | 2026-10-31 | 2026-11-10
+ 599686 | Scotch bonnet  | A     | Kadawa      |            25 | 2026-10-31 | 2026-11-10
+ 599696 | Plantain       | B     | Ijebu-Ode   |            50 | 2026-10-31 | 2026-11-10
+ 599702 | Plantain       | B     | Ijebu-Ode   |            95 | 2026-10-31 | 2026-11-10
+ 599705 | Plantain       | C     | Ijebu-Ode   |            99 | 2026-10-31 | 2026-11-10
+ 599708 | Scotch bonnet  | B     | Ogbomoso    |             5 | 2026-10-31 | 2026-11-10
+ 599710 | Plantain       | B     | Ijebu-Ode   |            60 | 2026-10-31 | 2026-11-10
+ 599719 | Scotch bonnet  | A     | Kadawa      |            23 | 2026-10-31 | 2026-11-10
+ 599723 | Scotch bonnet  | A     | Kadawa      |            20 | 2026-10-31 | 2026-11-10
+ 599724 | Plantain       | C     | Ijebu-Ode   |            50 | 2026-10-31 | 2026-11-10
+ 599732 | Plantain       | A     | Ijebu-Ode   |            63 | 2026-10-31 | 2026-11-10
+ 599734 | Scotch bonnet  | B     | Ogbomoso    |            32 | 2026-10-31 | 2026-11-10
+ 599735 | Scotch bonnet  | A     | Kadawa      |            18 | 2026-10-31 | 2026-11-10
+ 599741 | Plantain       | B     | Ijebu-Ode   |           111 | 2026-10-31 | 2026-11-10
+ 599744 | Scotch bonnet  | B     | Kadawa      |             7 | 2026-10-31 | 2026-11-10
+ 599748 | Scotch bonnet  | B     | Ogbomoso    |            38 | 2026-10-31 | 2026-11-10
+ 599750 | Plantain       | B     | Ijebu-Ode   |            96 | 2026-10-31 | 2026-11-10
+ 599757 | Scotch bonnet  | B     | Kadawa      |            31 | 2026-10-31 | 2026-11-10
+ 599758 | Plantain       | B     | Ijebu-Ode   |           113 | 2026-10-31 | 2026-11-10
+ 599760 | Plantain       | B     | Ijebu-Ode   |            68 | 2026-10-31 | 2026-11-10
+ 599765 | Plantain       | B     | Ijebu-Ode   |            59 | 2026-10-31 | 2026-11-10
+ 599766 | Scotch bonnet  | B     | Ogbomoso    |            14 | 2026-10-31 | 2026-11-10
+ 599768 | Scotch bonnet  | B     | Ogbomoso    |            32 | 2026-10-31 | 2026-11-10
+ 599773 | Plantain       | B     | Ijebu-Ode   |           119 | 2026-10-31 | 2026-11-10
+ 599774 | Plantain       | C     | Ijebu-Ode   |            77 | 2026-10-31 | 2026-11-10
+ 599775 | Scotch bonnet  | C     | Kadawa      |            21 | 2026-10-31 | 2026-11-10
+ 599776 | Scotch bonnet  | A     | Kadawa      |            37 | 2026-10-31 | 2026-11-10
+ 599779 | Scotch bonnet  | A     | Ogbomoso    |            33 | 2026-10-31 | 2026-11-10
+ 599781 | Scotch bonnet  | B     | Kadawa      |            24 | 2026-10-31 | 2026-11-10
+ 599786 | Scotch bonnet  | B     | Ogbomoso    |            15 | 2026-10-31 | 2026-11-10
+ 599787 | Plantain       | C     | Ijebu-Ode   |            84 | 2026-10-31 | 2026-11-10
+ 599789 | Plantain       | B     | Ijebu-Ode   |            96 | 2026-10-31 | 2026-11-10
+ 599792 | Plantain       | A     | Ijebu-Ode   |            49 | 2026-10-31 | 2026-11-10
+ 599794 | Scotch bonnet  | A     | Ogbomoso    |            32 | 2026-10-31 | 2026-11-10
+ 599795 | Scotch bonnet  | B     | Ogbomoso    |             6 | 2026-10-31 | 2026-11-10
+ 599799 | Plantain       | B     | Ijebu-Ode   |            32 | 2026-10-31 | 2026-11-10
+ 599802 | Scotch bonnet  | C     | Ogbomoso    |             8 | 2026-10-31 | 2026-11-10
+ 599806 | Plantain       | A     | Ijebu-Ode   |            23 | 2026-10-31 | 2026-11-10
+ 599807 | Plantain       | B     | Ijebu-Ode   |            30 | 2026-10-31 | 2026-11-10
+ 599808 | Scotch bonnet  | B     | Kadawa      |            22 | 2026-10-31 | 2026-11-10
+ 599814 | Plantain       | B     | Ijebu-Ode   |            97 | 2026-10-31 | 2026-11-10
+ 599815 | Plantain       | C     | Ijebu-Ode   |            53 | 2026-10-31 | 2026-11-10
+ 599816 | Scotch bonnet  | B     | Kadawa      |            29 | 2026-10-31 | 2026-11-10
+ 599818 | Plantain       | A     | Ijebu-Ode   |           114 | 2026-10-31 | 2026-11-10
+ 599819 | Plantain       | A     | Ijebu-Ode   |           103 | 2026-10-31 | 2026-11-10
+ 599824 | Plantain       | A     | Ijebu-Ode   |            96 | 2026-10-31 | 2026-11-10
+ 599829 | Scotch bonnet  | B     | Ogbomoso    |            23 | 2026-10-31 | 2026-11-10
+ 599836 | Plantain       | B     | Ijebu-Ode   |            90 | 2026-10-31 | 2026-11-10
+ 599837 | Plantain       | B     | Ijebu-Ode   |            92 | 2026-10-31 | 2026-11-10
+ 599840 | Plantain       | A     | Ijebu-Ode   |            40 | 2026-10-31 | 2026-11-10
+ 599841 | Scotch bonnet  | B     | Kadawa      |            28 | 2026-10-31 | 2026-11-10
+ 599842 | Scotch bonnet  | B     | Kadawa      |            10 | 2026-10-31 | 2026-11-10
+ 599848 | Plantain       | B     | Ijebu-Ode   |            52 | 2026-10-31 | 2026-11-10
+ 599860 | Scotch bonnet  | C     | Kadawa      |            14 | 2026-10-31 | 2026-11-10
+ 599862 | Plantain       | B     | Ijebu-Ode   |            57 | 2026-10-31 | 2026-11-10
+ 599866 | Scotch bonnet  | A     | Kadawa      |            35 | 2026-10-31 | 2026-11-10
+ 599868 | Scotch bonnet  | B     | Kadawa      |            37 | 2026-10-31 | 2026-11-10
+ 599870 | Plantain       | B     | Ijebu-Ode   |           111 | 2026-10-31 | 2026-11-10
+ 599875 | Scotch bonnet  | B     | Kadawa      |            31 | 2026-10-31 | 2026-11-10
+ 599879 | Plantain       | B     | Ijebu-Ode   |           100 | 2026-10-31 | 2026-11-10
+ 599882 | Plantain       | B     | Ijebu-Ode   |            32 | 2026-10-31 | 2026-11-10
+ 599884 | Plantain       | B     | Ijebu-Ode   |           101 | 2026-10-31 | 2026-11-10
+ 599885 | Plantain       | B     | Ijebu-Ode   |            94 | 2026-10-31 | 2026-11-10
+ 599886 | Plantain       | B     | Ijebu-Ode   |           115 | 2026-10-31 | 2026-11-10
+ 599888 | Plantain       | B     | Ijebu-Ode   |            54 | 2026-10-31 | 2026-11-10
+ 599890 | Scotch bonnet  | B     | Ogbomoso    |             7 | 2026-10-31 | 2026-11-10
+ 599892 | Scotch bonnet  | B     | Kadawa      |            26 | 2026-10-31 | 2026-11-10
+ 599896 | Scotch bonnet  | B     | Ogbomoso    |            26 | 2026-10-31 | 2026-11-10
+ 599897 | Plantain       | A     | Ijebu-Ode   |            34 | 2026-10-31 | 2026-11-10
+ 599898 | Scotch bonnet  | C     | Kadawa      |            33 | 2026-10-31 | 2026-11-10
+ 599904 | Scotch bonnet  | B     | Kadawa      |            19 | 2026-10-31 | 2026-11-10
+ 599910 | Plantain       | A     | Ijebu-Ode   |            56 | 2026-10-31 | 2026-11-10
+ 599912 | Scotch bonnet  | B     | Kadawa      |            13 | 2026-10-31 | 2026-11-10
+ 599916 | Plantain       | A     | Ijebu-Ode   |            89 | 2026-10-31 | 2026-11-10
+ 599920 | Scotch bonnet  | B     | Kadawa      |            37 | 2026-10-31 | 2026-11-10
+ 599925 | Scotch bonnet  | C     | Ogbomoso    |            25 | 2026-10-31 | 2026-11-10
+ 599935 | Plantain       | B     | Ijebu-Ode   |           104 | 2026-10-31 | 2026-11-10
+ 599938 | Scotch bonnet  | A     | Ogbomoso    |            15 | 2026-10-31 | 2026-11-10
+ 599939 | Scotch bonnet  | B     | Kadawa      |            26 | 2026-10-31 | 2026-11-10
+ 599941 | Plantain       | A     | Ijebu-Ode   |            91 | 2026-10-31 | 2026-11-10
+ 599942 | Plantain       | B     | Ijebu-Ode   |            86 | 2026-10-31 | 2026-11-10
+ 599945 | Plantain       | B     | Ijebu-Ode   |            51 | 2026-10-31 | 2026-11-10
+ 599948 | Scotch bonnet  | B     | Kadawa      |            17 | 2026-10-31 | 2026-11-10
+ 599951 | Plantain       | A     | Ijebu-Ode   |            59 | 2026-10-31 | 2026-11-10
+ 599952 | Plantain       | B     | Ijebu-Ode   |            33 | 2026-10-31 | 2026-11-10
+ 599955 | Plantain       | B     | Ijebu-Ode   |            42 | 2026-10-31 | 2026-11-10
+ 599969 | Plantain       | C     | Ijebu-Ode   |            51 | 2026-10-31 | 2026-11-10
+ 599973 | Scotch bonnet  | B     | Kadawa      |            29 | 2026-10-31 | 2026-11-10
+ 599976 | Plantain       | B     | Ijebu-Ode   |            78 | 2026-10-31 | 2026-11-10
+ 599979 | Plantain       | C     | Ijebu-Ode   |            34 | 2026-10-31 | 2026-11-10
+ 599986 | Plantain       | B     | Ijebu-Ode   |            82 | 2026-10-31 | 2026-11-10
+ 599989 | Plantain       | A     | Ijebu-Ode   |            39 | 2026-10-31 | 2026-11-10
+ 599992 | Plantain       | C     | Ijebu-Ode   |            63 | 2026-10-31 | 2026-11-10
+ 599994 | Scotch bonnet  | B     | Kadawa      |            26 | 2026-10-31 | 2026-11-10
+ 599999 | Scotch bonnet  | A     | Kadawa      |            23 | 2026-10-31 | 2026-11-10
+ 600008 | Plantain       | B     | Ijebu-Ode   |            53 | 2026-10-31 | 2026-11-10
+ 600010 | Scotch bonnet  | A     | Ogbomoso    |            21 | 2026-10-31 | 2026-11-10
+ 600011 | Scotch bonnet  | B     | Kadawa      |            21 | 2026-10-31 | 2026-11-10
+ 600015 | Scotch bonnet  | A     | Ogbomoso    |            36 | 2026-10-31 | 2026-11-10
+ 600017 | Plantain       | C     | Ijebu-Ode   |           117 | 2026-10-31 | 2026-11-10
+     11 | Tomato         | C     | Ogbomoso    |            30 | 2026-11-05 | 2026-11-12
+ 597468 | Cabbage        | B     | Bukuru      |            21 | 2026-10-29 | 2026-11-12
+ 597476 | Cabbage        | B     | Bukuru      |            24 | 2026-10-29 | 2026-11-12
+ 597543 | Cabbage        | A     | Bukuru      |            18 | 2026-10-29 | 2026-11-12
+ 597546 | Cabbage        | B     | Bukuru      |            15 | 2026-10-29 | 2026-11-12
+ 597561 | Cabbage        | B     | Bukuru      |             5 | 2026-10-29 | 2026-11-12
+ 597579 | Cabbage        | C     | Bukuru      |             7 | 2026-10-29 | 2026-11-12
+ 597581 | Cabbage        | A     | Bukuru      |            14 | 2026-10-29 | 2026-11-12
+ 597602 | Cabbage        | B     | Bukuru      |            22 | 2026-10-29 | 2026-11-12
+ 597606 | Cabbage        | C     | Bukuru      |            18 | 2026-10-29 | 2026-11-12
+ 597628 | Cabbage        | B     | Bukuru      |            22 | 2026-10-29 | 2026-11-12
+ 597648 | Cabbage        | B     | Bukuru      |            33 | 2026-10-29 | 2026-11-12
+ 597674 | Cabbage        | B     | Bukuru      |            30 | 2026-10-29 | 2026-11-12
+ 597690 | Cabbage        | B     | Bukuru      |            12 | 2026-10-29 | 2026-11-12
+ 597712 | Cabbage        | B     | Bukuru      |            25 | 2026-10-29 | 2026-11-12
+ 597767 | Cabbage        | B     | Bukuru      |            30 | 2026-10-29 | 2026-11-12
+ 597802 | Cabbage        | A     | Bukuru      |            16 | 2026-10-29 | 2026-11-12
+ 597839 | Cabbage        | C     | Bukuru      |            24 | 2026-10-29 | 2026-11-12
+ 597844 | Cabbage        | B     | Bukuru      |            24 | 2026-10-29 | 2026-11-12
+ 597901 | Cabbage        | A     | Bukuru      |            31 | 2026-10-29 | 2026-11-12
+ 597928 | Cabbage        | B     | Bukuru      |             5 | 2026-10-29 | 2026-11-12
+ 597938 | Cabbage        | B     | Bukuru      |            31 | 2026-10-29 | 2026-11-12
+ 598024 | Cabbage        | A     | Bukuru      |            29 | 2026-10-29 | 2026-11-12
+ 598038 | Cabbage        | C     | Bukuru      |            18 | 2026-10-29 | 2026-11-12
+ 598074 | Cabbage        | B     | Bukuru      |             5 | 2026-10-29 | 2026-11-12
+ 598150 | Cabbage        | B     | Bukuru      |            20 | 2026-10-29 | 2026-11-12
+ 598162 | Cabbage        | C     | Bukuru      |            10 | 2026-10-29 | 2026-11-12
+ 598186 | Cabbage        | A     | Bukuru      |            27 | 2026-10-29 | 2026-11-12
+ 598201 | Cabbage        | B     | Bukuru      |            19 | 2026-10-29 | 2026-11-12
+ 598242 | Cabbage        | B     | Bukuru      |            26 | 2026-10-29 | 2026-11-12
+ 598267 | Cabbage        | C     | Bukuru      |            39 | 2026-10-29 | 2026-11-12
+ 598320 | Cabbage        | B     | Bukuru      |            25 | 2026-10-29 | 2026-11-12
+ 598321 | Cabbage        | A     | Bukuru      |            10 | 2026-10-29 | 2026-11-12
+(300 rows)
+
