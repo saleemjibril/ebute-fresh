@@ -1,0 +1,148 @@
+ count  
+--------
+ 949508
+(1 row)
+
+ count  
+--------
+ 600018
+(1 row)
+
+
+==== Test 1: force the planner to use indexes instead of hash joins ====
+BEGIN
+SET
+SET
+SET
+                                                                                              QUERY PLAN                                                                                               
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate  (cost=92442.91..100730.59 rows=34608 width=89) (actual time=646.936..667.566 rows=36 loops=1)
+   Group Key: ((date_trunc('month'::text, (o.delivery_date)::timestamp with time zone))::date), c.commodity_name, s.state_name
+   Buffers: shared hit=806503 read=21448 written=48, temp read=703 written=705
+   ->  Gather Merge  (cost=92442.91..99259.75 rows=34608 width=89) (actual time=646.443..667.496 rows=72 loops=1)
+         Workers Planned: 1
+         Workers Launched: 1
+         Buffers: shared hit=806503 read=21448 written=48, temp read=703 written=705
+         ->  Partial GroupAggregate  (cost=91442.90..94366.34 rows=34608 width=89) (actual time=622.270..643.599 rows=36 loops=2)
+               Group Key: ((date_trunc('month'::text, (o.delivery_date)::timestamp with time zone))::date), c.commodity_name, s.state_name
+               Buffers: shared hit=806503 read=21448 written=48, temp read=703 written=705
+               ->  Sort  (cost=91442.90..91621.63 rows=71492 width=33) (actual time=621.760..625.241 rows=62622 loops=2)
+                     Sort Key: ((date_trunc('month'::text, (o.delivery_date)::timestamp with time zone))::date), c.commodity_name, s.state_name
+                     Sort Method: external merge  Disk: 2800kB
+                     Buffers: shared hit=806503 read=21448 written=48, temp read=703 written=705
+                     Worker 0:  Sort Method: external merge  Disk: 2824kB
+                     ->  Nested Loop  (cost=448.32..83722.18 rows=71492 width=33) (actual time=0.749..590.168 rows=62622 loops=2)
+                           Buffers: shared hit=806487 read=21448 written=48
+                           ->  Nested Loop  (cost=448.18..81512.49 rows=71492 width=31) (actual time=0.680..564.034 rows=62622 loops=2)
+                                 Buffers: shared hit=806466 read=21448 written=48
+                                 ->  Nested Loop  (cost=448.04..79867.29 rows=71492 width=30) (actual time=0.669..550.309 rows=62622 loops=2)
+                                       Buffers: shared hit=806445 read=21448 written=48
+                                       ->  Nested Loop  (cost=447.61..41009.60 rows=71492 width=30) (actual time=0.635..407.371 rows=62622 loops=2)
+                                             Buffers: shared hit=317881 read=9035 written=20
+                                             ->  Nested Loop  (cost=447.19..23736.17 rows=29285 width=36) (actual time=0.394..56.111 rows=25058 loops=2)
+                                                   Buffers: shared hit=125318 read=569 written=3
+                                                   ->  Nested Loop  (cost=447.05..23045.42 rows=29285 width=30) (actual time=0.380..45.189 rows=25058 loops=2)
+                                                         Buffers: shared hit=125285 read=569 written=3
+                                                         ->  Parallel Bitmap Heap Scan on sales_order o  (cost=446.62..2835.54 rows=18583 width=12) (actual time=0.221..3.759 rows=15674 loops=2)
+                                                               Recheck Cond: ((delivery_date >= '2026-07-01'::date) AND (delivery_date < '2026-10-01'::date))
+                                                               Filter: ((status)::text = 'delivered'::text)
+                                                               Rows Removed by Filter: 308
+                                                               Heap Blocks: exact=136
+                                                               Buffers: shared hit=191 read=109
+                                                               ->  Bitmap Index Scan on sales_order_delivery_idx  (cost=0.00..438.73 rows=32243 width=0) (actual time=0.390..0.390 rows=31966 loops=1)
+                                                                     Index Cond: ((delivery_date >= '2026-07-01'::date) AND (delivery_date < '2026-10-01'::date))
+                                                                     Buffers: shared hit=29
+                                                         ->  Index Scan using order_line_pkey on order_line ol  (cost=0.42..1.07 rows=2 width=18) (actual time=0.002..0.002 rows=2 loops=31349)
+                                                               Index Cond: (order_id = o.order_id)
+                                                               Buffers: shared hit=125094 read=460 written=3
+                                                   ->  Memoize  (cost=0.14..0.16 rows=1 width=10) (actual time=0.000..0.000 rows=1 loops=50115)
+                                                         Cache Key: ol.commodity_id
+                                                         Cache Mode: logical
+                                                         Hits: 24945  Misses: 8  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                                         Buffers: shared hit=33
+                                                         Worker 0:  Hits: 25154  Misses: 8  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                                         ->  Index Scan using commodity_pkey on commodity c  (cost=0.13..0.15 rows=1 width=10) (actual time=0.002..0.002 rows=1 loops=16)
+                                                               Index Cond: (commodity_id = ol.commodity_id)
+                                                               Buffers: shared hit=33
+                                             ->  Index Scan using allocation_pkey on allocation a  (cost=0.42..0.58 rows=1 width=22) (actual time=0.013..0.014 rows=2 loops=50115)
+                                                   Index Cond: ((order_id = ol.order_id) AND (line_no = ol.line_no))
+                                                   Buffers: shared hit=192563 read=8466 written=17
+                                       ->  Index Scan using produce_lot_pkey on produce_lot l  (cost=0.42..0.54 rows=1 width=16) (actual time=0.002..0.002 rows=1 loops=125244)
+                                             Index Cond: (lot_id = a.lot_id)
+                                             Buffers: shared hit=488564 read=12413 written=28
+                                 ->  Memoize  (cost=0.14..0.16 rows=1 width=5) (actual time=0.000..0.000 rows=1 loops=125244)
+                                       Cache Key: l.centre_id
+                                       Cache Mode: logical
+                                       Hits: 62371  Misses: 5  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                       Buffers: shared hit=21
+                                       Worker 0:  Hits: 62863  Misses: 5  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                       ->  Index Scan using collection_centre_pkey on collection_centre cc  (cost=0.13..0.15 rows=1 width=5) (actual time=0.002..0.002 rows=1 loops=10)
+                                             Index Cond: (centre_id = l.centre_id)
+                                             Buffers: shared hit=21
+                           ->  Memoize  (cost=0.14..2.56 rows=1 width=8) (actual time=0.000..0.000 rows=1 loops=125244)
+                                 Cache Key: cc.state_code
+                                 Cache Mode: logical
+                                 Hits: 62371  Misses: 5  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                 Buffers: shared hit=21
+                                 Worker 0:  Hits: 62863  Misses: 5  Evictions: 0  Overflows: 0  Memory Usage: 1kB
+                                 ->  Index Scan using state_pkey on state s  (cost=0.13..2.55 rows=1 width=8) (actual time=0.014..0.014 rows=1 loops=10)
+                                       Index Cond: (state_code = cc.state_code)
+                                       Buffers: shared hit=21
+ Planning:
+   Buffers: shared hit=498
+ Planning Time: 2.250 ms
+ Execution Time: 668.259 ms
+(76 rows)
+
+ROLLBACK
+
+==== Test 2: monthly summary kept in a materialised view ====
+psql:q5-experiments.sql:47: NOTICE:  materialized view "monthly_sales" does not exist, skipping
+DROP MATERIALIZED VIEW
+Timing is on.
+SELECT 291
+Time: 730.238 ms
+CREATE INDEX
+Time: 1.780 ms
+REFRESH MATERIALIZED VIEW
+Time: 616.386 ms
+Timing is off.
+ANALYZE
+                                                          QUERY PLAN                                                          
+------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=11.91..12.00 rows=36 width=41) (actual time=0.052..0.053 rows=36 loops=1)
+   Sort Key: m.month, c.commodity_name, s.state_name
+   Sort Method: quicksort  Memory: 27kB
+   Buffers: shared hit=6
+   ->  Hash Join  (cost=2.32..10.98 rows=36 width=41) (actual time=0.019..0.029 rows=36 loops=1)
+         Hash Cond: (m.state_code = s.state_code)
+         Buffers: shared hit=6
+         ->  Hash Join  (cost=1.18..9.68 rows=36 width=39) (actual time=0.014..0.020 rows=36 loops=1)
+               Hash Cond: (m.commodity_id = c.commodity_id)
+               Buffers: shared hit=5
+               ->  Seq Scan on monthly_sales m  (cost=0.00..8.37 rows=36 width=33) (actual time=0.009..0.012 rows=36 loops=1)
+                     Filter: ((month >= '2026-07-01'::date) AND (month < '2026-10-01'::date))
+                     Rows Removed by Filter: 255
+                     Buffers: shared hit=4
+               ->  Hash  (cost=1.08..1.08 rows=8 width=10) (actual time=0.003..0.003 rows=8 loops=1)
+                     Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                     Buffers: shared hit=1
+                     ->  Seq Scan on commodity c  (cost=0.00..1.08 rows=8 width=10) (actual time=0.002..0.002 rows=8 loops=1)
+                           Buffers: shared hit=1
+         ->  Hash  (cost=1.06..1.06 rows=6 width=8) (actual time=0.004..0.004 rows=6 loops=1)
+               Buckets: 1024  Batches: 1  Memory Usage: 9kB
+               Buffers: shared hit=1
+               ->  Seq Scan on state s  (cost=0.00..1.06 rows=6 width=8) (actual time=0.002..0.003 rows=6 loops=1)
+                     Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=36 read=4
+ Planning Time: 0.736 ms
+ Execution Time: 0.061 ms
+(28 rows)
+
+
+Same figures as the original Q5? Rows that differ (expect none):
+ month | commodity_name | state_name | units | revenue | margin 
+-------+----------------+------------+-------+---------+--------
+(0 rows)
+
