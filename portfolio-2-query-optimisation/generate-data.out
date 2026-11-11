@@ -1,0 +1,128 @@
+Timing is on.
+SET
+Time: 0.080 ms
+BEGIN
+Time: 0.016 ms
+ setseed 
+---------
+ 
+(1 row)
+
+Time: 0.268 ms
+INSERT 0 552
+Time: 3.920 ms
+INSERT 0 15
+Time: 0.734 ms
+INSERT 0 4
+Time: 0.107 ms
+CREATE TABLE
+Time: 1.596 ms
+INSERT 0 5
+Time: 0.178 ms
+INSERT 0 20000
+Time: 200.638 ms
+INSERT 0 3000
+Time: 19.424 ms
+CREATE TABLE
+Time: 1.302 ms
+INSERT 0 5
+Time: 0.220 ms
+SELECT 600000
+Time: 411.151 ms
+INSERT 0 600000
+Time: 8969.826 ms (00:08.970)
+SELECT 250000
+Time: 176.614 ms
+SELECT 397381
+Time: 207.714 ms
+SELECT 17520
+Time: 189.155 ms
+SELECT 389492
+Time: 997.882 ms
+SELECT 388922
+Time: 765.025 ms
+SELECT 246800
+Time: 309.985 ms
+INSERT 0 246800
+Time: 2041.154 ms (00:02.041)
+INSERT 0 388922
+Time: 4263.410 ms (00:04.263)
+SELECT 600000
+Time: 1044.430 ms (00:01.044)
+CREATE INDEX
+Time: 194.531 ms
+ANALYZE
+Time: 38.815 ms
+ANALYZE
+Time: 58.458 ms
+ANALYZE
+Time: 50.561 ms
+ALTER TABLE
+Time: 0.268 ms
+INSERT 0 949494
+Time: 13274.769 ms (00:13.275)
+ALTER TABLE
+Time: 0.979 ms
+UPDATE 597424
+Time: 10102.848 ms (00:10.103)
+SELECT 540955
+Time: 426.330 ms
+DELETE 1532
+Time: 29.126 ms
+SELECT 466249
+Time: 544.532 ms
+INSERT 0 466249
+Time: 5832.480 ms (00:05.832)
+UPDATE 539423
+Time: 11575.087 ms (00:11.575)
+INSERT 0 234748
+Time: 3898.109 ms (00:03.898)
+ setval 
+--------
+     28
+(1 row)
+
+Time: 1.895 ms
+ setval 
+--------
+ 600018
+(1 row)
+
+Time: 0.188 ms
+ setval 
+--------
+ 246807
+(1 row)
+
+Time: 0.136 ms
+ setval 
+--------
+ 466256
+(1 row)
+
+Time: 0.160 ms
+COMMIT
+Time: 0.334 ms
+VACUUM
+Time: 2245.711 ms (00:02.246)
+
+Row counts after generation:
+  table_name   | count  
+---------------+--------
+ customer      |   3006
+ farmer        |  20013
+ sales_order   | 246807
+ payment       | 234753
+ order_line    | 388938
+ produce_lot   | 600018
+ allocation    | 949508
+ farmer_payout | 466256
+(8 rows)
+
+Time: 67.602 ms
+ database_size 
+---------------
+ 760 MB
+(1 row)
+
+Time: 2.627 ms
