@@ -1,0 +1,26 @@
+  time   session
+  0.00s   A      --- Round 1: lines locked in the order they were entered
+  0.00s   A   round 1: BEGIN, wants tomato (lot 14) then plantain (lot 12)
+  0.00s   A   locked lot 14 (tomato)
+  0.51s   B   round 1: BEGIN, wants plantain (lot 12) then tomato (lot 14)
+  0.52s   B   locked lot 12 (plantain)
+  1.00s   A   asks for lot 12 (plantain) ...
+  1.53s   B   asks for lot 14 (tomato) ...
+  2.08s   A      ERROR:  deadlock detected
+  2.08s   A      DETAIL:  Process 3606 waits for ShareLock on transaction 2895; blocked by process 3607.
+  2.08s   A      Process 3607 waits for ShareLock on transaction 2894; blocked by process 3606.
+  2.08s   A      HINT:  See server log for query details.
+  2.08s   A      CONTEXT:  while locking tuple (0,28) in relation "produce_lot"
+  2.08s   A   was rolled back by PostgreSQL to break the deadlock, so lot 14 is released
+  2.08s   B   locked lot 14 (tomato)
+  2.08s   B   COMMIT
+  4.09s   A      --- Round 2: lots always locked in commodity order
+  4.09s   A   round 2: BEGIN, locks in commodity order: tomato (1) before plantain (5)
+  4.09s   A   locked lot 14 (tomato)
+  4.59s   B   round 2: BEGIN, locks in commodity order: tomato (1) before plantain (5)
+  4.59s   B   asks for lot 14 (tomato) ...
+  5.09s   A   locked lot 12 (plantain)
+  5.09s   A   COMMIT
+  5.10s   B   locked lot 14 (tomato)
+  5.10s   B   locked lot 12 (plantain)
+  5.10s   B   COMMIT. It waited, but nobody had to be rolled back.

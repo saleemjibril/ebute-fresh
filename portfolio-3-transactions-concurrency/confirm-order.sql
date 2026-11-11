@@ -14,7 +14,7 @@
 --   lot waits until the first commits, then sees the reduced quantity.
 -- * Lines are handled in commodity and grade order, not line order, so two
 --   orders being confirmed together always lock lots in the same order and
---   cannot deadlock each other (see 07-deadlock).
+--   cannot deadlock each other (see 06-deadlock).
 
 CREATE OR REPLACE FUNCTION confirm_order(p_order_id bigint) RETURNS void
 LANGUAGE plpgsql AS $$
