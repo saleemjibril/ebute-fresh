@@ -1,0 +1,50 @@
+== 1. Create the primary
+waiting for server to start.... done
+server started
+ lots | units_in_stock 
+------+----------------
+   18 |           1204
+(1 row)
+
+== 2. Clone it into a replica
+   pg_basebackup: initiating base backup, waiting for checkpoint to complete
+   pg_basebackup: checkpoint completed
+   pg_basebackup: write-ahead log start point: 0/2000028 on timeline 1
+   pg_basebackup: starting background WAL receiver
+   pg_basebackup: created replication slot "ebute_replica_slot"
+   pg_basebackup: write-ahead log end point: 0/2062DD0
+   pg_basebackup: waiting for background process to finish streaming ...
+   pg_basebackup: syncing data to disk ...
+   pg_basebackup: renaming backup_manifest.tmp to backup_manifest
+   pg_basebackup: base backup completed
+   pg_basebackup set the replica to connect to the primary as:
+   user=replicator host=localhost port=5440
+   file present: standby.signal
+waiting for server to start.... done
+server started
+== 3. Check both nodes
+     node      | read_only 
+---------------+-----------
+ ebute_primary | f
+(1 row)
+
+ application_name | client_addr |   state   | sync_state | sent_lsn  | replay_lsn 
+------------------+-------------+-----------+------------+-----------+------------
+ ebute_replica    | 127.0.0.1   | streaming | async      | 0/3000000 | 0/3000000
+(1 row)
+
+     node      | read_only 
+---------------+-----------
+ ebute_replica | t
+(1 row)
+
+  status   | sender_host | sender_port |     slot_name      
+-----------+-------------+-------------+--------------------
+ streaming | localhost   |        5440 | ebute_replica_slot
+(1 row)
+
+ lots | units_in_stock 
+------+----------------
+   18 |           1204
+(1 row)
+
