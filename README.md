@@ -63,3 +63,5 @@ tested.
 ## Environment
 
 - PostgreSQL 16 on macOS (Homebrew), accessed with `psql`.
+- MongoDB 9.0 and `mongosh` (Homebrew), used in Portfolio 4.
+- Python 3.9 with `psycopg2` and `pymongo`, used to copy the data into MongoDB.
