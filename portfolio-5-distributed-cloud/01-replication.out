@@ -1,0 +1,61 @@
+--- A new intake is recorded at Kadawa. Intake officers write to the primary.
+
+[primary 5440]
+
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received,
+                         qty_remaining, farm_gate_price, received_at, received_by)
+VALUES (2, 1, 1, 'A', 40, 40, 27000, '2026-11-12 07:05+01', 1)
+RETURNING lot_id, qty_received, received_at;
+ lot_id | qty_received |      received_at       
+--------+--------------+------------------------
+     19 |           40 | 2026-11-12 07:05:00+01
+(1 row)
+
+INSERT 0 1
+
+--- The sales desk reads stock from the replica straight after.
+
+[replica 5441]
+
+SELECT lot_id, commodity_name, grade, centre_name, qty_remaining, received_at
+FROM lot_stock
+WHERE lot_id = 19;
+ lot_id | commodity_name | grade | centre_name | qty_remaining |      received_at       
+--------+----------------+-------+-------------+---------------+------------------------
+     19 | Tomato         | A     | Kadawa      |            40 | 2026-11-12 07:05:00+01
+(1 row)
+
+
+--- How far behind the replica was, as the primary sees it.
+
+[primary 5440]
+
+SELECT application_name, state, sync_state,
+       pg_wal_lsn_diff(sent_lsn, replay_lsn) AS bytes_not_yet_replayed,
+       write_lag, flush_lag, replay_lag
+FROM pg_stat_replication;
+ application_name |   state   | sync_state | bytes_not_yet_replayed |    write_lag    |    flush_lag    |   replay_lag    
+------------------+-----------+------------+------------------------+-----------------+-----------------+-----------------
+ ebute_replica    | streaming | async      |                      0 | 00:00:00.005223 | 00:00:00.005224 | 00:00:00.005535
+(1 row)
+
+
+--- Someone points a write at the replica by mistake.
+
+[replica 5441]
+
+UPDATE produce_lot SET qty_remaining = 0 WHERE lot_id = 19;
+ERROR:  cannot execute UPDATE in a read-only transaction
+
+[replica 5441]
+
+SELECT pg_is_in_recovery() AS read_only, current_setting('transaction_read_only') AS transaction_read_only;
+ read_only | transaction_read_only 
+-----------+-----------------------
+ t         | on
+(1 row)
+
+
+--- Both nodes hold the same data.
+ebute_primary: 19 lots, 1244 units in stock, 5 payments
+ebute_replica: 19 lots, 1244 units in stock, 5 payments
