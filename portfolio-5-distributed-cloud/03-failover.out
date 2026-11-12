@@ -1,0 +1,137 @@
+--- Last intake before the failure: Irish potato at Bukuru.
+
+[port 5440]
+
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received,
+                         qty_remaining, farm_gate_price, received_at, received_by)
+VALUES (4, 2, 3, 'A', 60, 60, 37000, '2026-11-12 16:30+01', 2)
+RETURNING lot_id;
+ lot_id 
+--------
+     20
+(1 row)
+
+INSERT 0 1
+
+[port 5440]
+
+SELECT application_name, pg_wal_lsn_diff(sent_lsn, replay_lsn) AS bytes_not_yet_replayed
+FROM pg_stat_replication;
+ application_name | bytes_not_yet_replayed 
+------------------+------------------------
+ ebute_replica    |                      0
+(1 row)
+
+
+--- The primary crashes (stopped with -m immediate, like a power cut).
+waiting for server to shut down.... done
+server stopped
+
+[port 5440]
+psql: error: connection to server on socket "/tmp/.s.PGSQL.5440" failed: No such file or directory
+	Is the server running locally and accepting connections on that socket?
+
+--- The replica still answers reads, but nobody can record intakes or orders.
+
+[port 5441]
+SELECT count(*) AS lots FROM produce_lot;
+ lots 
+------
+   20
+(1 row)
+
+
+[port 5441]
+
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received,
+                         qty_remaining, farm_gate_price, received_at, received_by)
+VALUES (13, 5, 5, 'A', 30, 30, 5600, '2026-11-12 16:50+01', 5);
+ERROR:  cannot execute INSERT in a read-only transaction
+
+--- Promote the replica.
+
+[port 5441]
+SELECT pg_promote();
+ pg_promote 
+------------
+ t
+(1 row)
+
+SELECT current_setting('cluster_name') AS node, pg_is_in_recovery() AS read_only;
+     node      | read_only 
+---------------+-----------
+ ebute_replica | f
+(1 row)
+
+SELECT pg_walfile_name(pg_current_wal_lsn()) AS wal_file_now_on_timeline_2;
+ wal_file_now_on_timeline_2 
+----------------------------
+ 000000020000000000000003
+(1 row)
+
+
+--- Ijebu-Ode records an intake on the new primary.
+
+[port 5441]
+
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received,
+                         qty_remaining, farm_gate_price, received_at, received_by)
+VALUES (13, 5, 5, 'A', 30, 30, 5600, '2026-11-12 16:50+01', 5)
+RETURNING lot_id;
+ lot_id 
+--------
+     52
+(1 row)
+
+INSERT 0 1
+
+--- Nothing committed before the crash was lost.
+
+[port 5441]
+
+SELECT lot_id, commodity_name, centre_name, qty_received, received_at
+FROM lot_stock WHERE lot_id >= 19 ORDER BY lot_id;
+ lot_id | commodity_name | centre_name | qty_received |      received_at       
+--------+----------------+-------------+--------------+------------------------
+     19 | Tomato         | Kadawa      |           40 | 2026-11-12 07:05:00+01
+     20 | Irish potato   | Bukuru      |           60 | 2026-11-12 16:30:00+01
+     52 | Plantain       | Ijebu-Ode   |           30 | 2026-11-12 16:50:00+01
+(3 rows)
+
+SELECT count(*) AS payments, sum(amount) AS total FROM payment;
+ payments |   total    
+----------+------------
+        8 | 8600000.00
+(1 row)
+
+
+--- Someone restarts the old primary without rebuilding it.
+waiting for server to start.... done
+server started
+
+[port 5440]
+SELECT current_setting('cluster_name') AS node, pg_is_in_recovery() AS read_only;
+     node      | read_only 
+---------------+-----------
+ ebute_primary | f
+(1 row)
+
+
+[port 5440]
+
+INSERT INTO produce_lot (farmer_id, centre_id, commodity_id, grade, qty_received,
+                         qty_remaining, farm_gate_price, received_at, received_by)
+VALUES (3, 1, 1, 'B', 25, 25, 21000, '2026-11-12 17:10+01', 1)
+RETURNING lot_id;
+ lot_id 
+--------
+     52
+(1 row)
+
+INSERT 0 1
+
+--- Two primaries now accept writes, and they disagree.
+ebute_primary (port 5440): lots 20=Irish potato, 52=Tomato
+ebute_replica (port 5441): lots 20=Irish potato, 52=Plantain
+waiting for server to shut down.... done
+server stopped
