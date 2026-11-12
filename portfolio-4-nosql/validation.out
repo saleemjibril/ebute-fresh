@@ -1,0 +1,28 @@
+Lots already loaded that break the rules: 0
+
+--- Inserts
+REJECTED  grade D
+          Document failed validation
+          {"operatorName":"$and","clausesNotSatisfied":[{"index":0,"details":{"operatorName":"$jsonSchema","schemaRulesNotSatisfied":[{"operatorName":"properties","propertiesNotSatisfied":[{"propertyName":"grade","details":[{"oper...
+REJECTED  negative stock
+          Document failed validation
+          {"operatorName":"$and","clausesNotSatisfied":[{"index":0,"details":{"operatorName":"$jsonSchema","schemaRulesNotSatisfied":[{"operatorName":"properties","propertiesNotSatisfied":[{"propertyName":"qty_remaining","details"...
+REJECTED  no farmer
+          Document failed validation
+          {"operatorName":"$and","clausesNotSatisfied":[{"index":0,"details":{"operatorName":"$jsonSchema","schemaRulesNotSatisfied":[{"operatorName":"required","specifiedAs":{"required":["commodity","grade","farmer","centre","rec...
+REJECTED  price as text
+          Document failed validation
+          {"operatorName":"$and","clausesNotSatisfied":[{"index":0,"details":{"operatorName":"$jsonSchema","schemaRulesNotSatisfied":[{"operatorName":"properties","propertiesNotSatisfied":[{"propertyName":"farm_gate_price","detail...
+REJECTED  remaining does not match allocations
+          Document failed validation
+          {"operatorName":"$and","clausesNotSatisfied":[{"index":1,"details":{"operatorName":"$expr","specifiedAs":{"$expr":{"$eq":["$qty_remaining",{"$subtract":["$qty_received",{"$sum":"$allocations.qty"}]}]}},"reason":"expressi...
+ACCEPTED  valid lot  {"acknowledged":true,"insertedId":900001}
+
+--- Updates
+REJECTED  allocate 10 crates but forget to reduce qty_remaining
+          Plan executor error during update :: caused by :: Document failed validation
+          {"operatorName":"$and","clausesNotSatisfied":[{"index":1,"details":{"operatorName":"$expr","specifiedAs":{"$expr":{"$eq":["$qty_remaining",{"$subtract":["$qty_received",{"$sum":"$allocations.qty"}]}]}},"reason":"expressi...
+ACCEPTED  allocate 10 crates and reduce qty_remaining in the same update  {"acknowledged":true,"insertedId":null,"matchedCount":1,"modifiedCount":1,"upsertedCount":0}
+ACCEPTED  allocate to an order that does not exist  {"acknowledged":true,"insertedId":null,"matchedCount":1,"modifiedCount":1,"upsertedCount":0}
+Order 999999999 exists: false
+Order 246807 exists, but its document knows nothing about lot 900001: true
