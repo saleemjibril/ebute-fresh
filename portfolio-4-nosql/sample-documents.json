@@ -1,0 +1,367 @@
+{
+  "lot_583326": {
+    "_id": 583326,
+    "commodity": {
+      "id": 1,
+      "name": "Tomato",
+      "unit": "crate"
+    },
+    "grade": "A",
+    "farmer": {
+      "id": 18633,
+      "name": "Bitrus Gyang"
+    },
+    "centre": {
+      "id": 2,
+      "name": "Bukuru",
+      "state": "Plateau"
+    },
+    "received_by": {
+      "id": 11,
+      "name": "Intake Officer 2"
+    },
+    "received_at": {
+      "$date": "2026-10-12T09:36:34.106Z"
+    },
+    "best_before": {
+      "$date": "2026-10-19T00:00:00Z"
+    },
+    "qty_received": 43,
+    "qty_remaining": 0,
+    "farm_gate_price": {
+      "$numberDecimal": "24350.00"
+    },
+    "payout": {
+      "id": 456605,
+      "paid_at": {
+        "$date": "2026-10-16T14:05:00Z"
+      }
+    },
+    "allocations": [
+      {
+        "order_id": 240965,
+        "line_no": 3,
+        "qty": 43,
+        "delivery_date": {
+          "$date": "2026-10-14T00:00:00Z"
+        },
+        "customer": {
+          "id": 504,
+          "name": "Mama Foodstuff 498",
+          "phone": "+2349000000498"
+        }
+      }
+    ]
+  },
+  "order_240965": {
+    "_id": 240965,
+    "customer": {
+      "id": 504,
+      "name": "Mama Foodstuff 498",
+      "type": "trader",
+      "lga": "Eti-Osa"
+    },
+    "taken_by": {
+      "id": 26,
+      "name": "Sales Officer 2"
+    },
+    "placed_at": {
+      "$date": "2026-10-12T08:31:55.634Z"
+    },
+    "delivery_date": {
+      "$date": "2026-10-14T00:00:00Z"
+    },
+    "status": "delivered",
+    "lines": [
+      {
+        "line_no": 1,
+        "commodity": {
+          "id": 3,
+          "name": "Irish potato"
+        },
+        "grade": "C",
+        "qty": 24,
+        "unit_price": {
+          "$numberDecimal": "36000.00"
+        },
+        "allocations": [
+          {
+            "lot_id": 583097,
+            "qty": 24,
+            "farm_gate_price": {
+              "$numberDecimal": "24400.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T07:12:35.093Z"
+            },
+            "farmer": {
+              "id": 5070,
+              "name": "Pam Pam"
+            },
+            "centre": {
+              "name": "Bukuru",
+              "state": "Plateau"
+            }
+          }
+        ]
+      },
+      {
+        "line_no": 2,
+        "commodity": {
+          "id": 6,
+          "name": "Scotch bonnet"
+        },
+        "grade": "B",
+        "qty": 26,
+        "unit_price": {
+          "$numberDecimal": "40000.00"
+        },
+        "allocations": [
+          {
+            "lot_id": 583264,
+            "qty": 16,
+            "farm_gate_price": {
+              "$numberDecimal": "27200.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T09:01:51.055Z"
+            },
+            "farmer": {
+              "id": 1433,
+              "name": "Funmilayo Oladejo"
+            },
+            "centre": {
+              "name": "Ogbomoso",
+              "state": "Oyo"
+            }
+          },
+          {
+            "lot_id": 583275,
+            "qty": 10,
+            "farm_gate_price": {
+              "$numberDecimal": "25150.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T09:07:42.324Z"
+            },
+            "farmer": {
+              "id": 17005,
+              "name": "Hadiza Ibrahim"
+            },
+            "centre": {
+              "name": "Kadawa",
+              "state": "Kano"
+            }
+          }
+        ]
+      },
+      {
+        "line_no": 3,
+        "commodity": {
+          "id": 1,
+          "name": "Tomato"
+        },
+        "grade": "A",
+        "qty": 138,
+        "unit_price": {
+          "$numberDecimal": "38000.00"
+        },
+        "allocations": [
+          {
+            "lot_id": 583308,
+            "qty": 36,
+            "farm_gate_price": {
+              "$numberDecimal": "24200.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T09:30:22.335Z"
+            },
+            "farmer": {
+              "id": 13323,
+              "name": "Rabi Garba"
+            },
+            "centre": {
+              "name": "Kadawa",
+              "state": "Kano"
+            }
+          },
+          {
+            "lot_id": 583312,
+            "qty": 55,
+            "farm_gate_price": {
+              "$numberDecimal": "21050.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T09:31:58.984Z"
+            },
+            "farmer": {
+              "id": 12202,
+              "name": "Aminu Danjuma"
+            },
+            "centre": {
+              "name": "Kadawa",
+              "state": "Kano"
+            }
+          },
+          {
+            "lot_id": 583326,
+            "qty": 43,
+            "farm_gate_price": {
+              "$numberDecimal": "24350.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T09:36:34.106Z"
+            },
+            "farmer": {
+              "id": 18633,
+              "name": "Bitrus Gyang"
+            },
+            "centre": {
+              "name": "Bukuru",
+              "state": "Plateau"
+            }
+          },
+          {
+            "lot_id": 583335,
+            "qty": 4,
+            "farm_gate_price": {
+              "$numberDecimal": "22950.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T09:41:57.907Z"
+            },
+            "farmer": {
+              "id": 18326,
+              "name": "Funmilayo Oladejo"
+            },
+            "centre": {
+              "name": "Ogbomoso",
+              "state": "Oyo"
+            }
+          }
+        ]
+      },
+      {
+        "line_no": 4,
+        "commodity": {
+          "id": 4,
+          "name": "Yam"
+        },
+        "grade": "C",
+        "qty": 791,
+        "unit_price": {
+          "$numberDecimal": "2500.00"
+        },
+        "allocations": [
+          {
+            "lot_id": 583096,
+            "qty": 366,
+            "farm_gate_price": {
+              "$numberDecimal": "1550.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T07:11:57.392Z"
+            },
+            "farmer": {
+              "id": 11462,
+              "name": "Aondona Akaa"
+            },
+            "centre": {
+              "name": "Zaki Biam",
+              "state": "Benue"
+            }
+          },
+          {
+            "lot_id": 583137,
+            "qty": 194,
+            "farm_gate_price": {
+              "$numberDecimal": "1650.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T07:38:10.109Z"
+            },
+            "farmer": {
+              "id": 4748,
+              "name": "Bukola Ogunleye"
+            },
+            "centre": {
+              "name": "Ogbomoso",
+              "state": "Oyo"
+            }
+          },
+          {
+            "lot_id": 583192,
+            "qty": 231,
+            "farm_gate_price": {
+              "$numberDecimal": "1400.00"
+            },
+            "received_at": {
+              "$date": "2026-10-12T08:19:17.301Z"
+            },
+            "farmer": {
+              "id": 4977,
+              "name": "Orduen Ugba"
+            },
+            "centre": {
+              "name": "Zaki Biam",
+              "state": "Benue"
+            }
+          }
+        ]
+      }
+    ],
+    "payments": [
+      {
+        "payment_id": 93748,
+        "amount": {
+          "$numberDecimal": "9125500.00"
+        },
+        "method": "transfer",
+        "paid_at": {
+          "$date": "2026-10-15T09:12:03.212Z"
+        },
+        "reference": "NIP000000240965"
+      }
+    ]
+  },
+  "farmer_124_last_two_payouts": {
+    "_id": 124,
+    "first_name": "Choji",
+    "last_name": "Dalyop",
+    "phone": "+2347000000111",
+    "home_centre": {
+      "id": 2,
+      "name": "Bukuru",
+      "state": "Plateau"
+    },
+    "registered_on": {
+      "$date": "2023-07-12T00:00:00Z"
+    },
+    "payouts": [
+      {
+        "payout_id": 442989,
+        "amount": {
+          "$numberDecimal": "203700.00"
+        },
+        "paid_at": {
+          "$date": "2026-10-02T15:09:00Z"
+        },
+        "bank_ref": "FT2610020442989"
+      },
+      {
+        "payout_id": 461570,
+        "amount": {
+          "$numberDecimal": "426400.00"
+        },
+        "paid_at": {
+          "$date": "2026-10-30T12:50:00Z"
+        },
+        "bank_ref": "FT2610300461570"
+      }
+    ],
+    "bank": {
+      "name": "UBA",
+      "account_number": "8790470569"
+    }
+  }
+}

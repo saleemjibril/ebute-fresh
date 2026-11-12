@@ -1,0 +1,18 @@
+Loaded in 72 s
+
+                             PostgreSQL      MongoDB
+customers                          3006         3006  ok
+farmers                           20013        20013  ok
+lots                             600018       600018  ok
+orders                           246807       246807  ok
+farmers.payouts                  466256       466256  ok
+lots.allocations                 949508       949508  ok
+orders.lines                     388938       388938  ok
+orders.lines.allocations         949508       949508  ok
+orders.payments                  234753       234753  ok
+
+Size in MongoDB:
+  lots          600018 documents, average   629 bytes,   94.6 MB stored (compressed)
+  orders        246807 documents, average  1230 bytes,   74.8 MB stored (compressed)
+  farmers        20013 documents, average  2439 bytes,   18.8 MB stored (compressed)
+  customers       3006 documents, average   178 bytes,    0.2 MB stored (compressed)
