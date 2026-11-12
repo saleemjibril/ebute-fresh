@@ -1,0 +1,30 @@
+Before: two pending orders for 30 crates of grade A tomato each.
+Oldest grade A tomato with stock:
+  lot 597448 (Kadawa): 42 crates
+  lot 597454 (Bukuru): 44 crates
+
+  time   session
+  0.00s   A   confirming order 246808
+  0.02s   A   order 246808: lot 597448 shows 42 left, taking 30
+  0.02s   A   order 246808: printing delivery note, not committed yet
+  0.30s   B   confirming order 246809
+  0.31s   B   order 246809: lot 597448 shows 42 left, taking 30
+  0.32s   B   order 246809: WriteConflict, transaction aborted, retrying
+  0.58s   B   order 246809: lot 597448 shows 42 left, taking 30
+  0.59s   B   order 246809: WriteConflict, transaction aborted, retrying
+  0.85s   B   order 246809: lot 597448 shows 42 left, taking 30
+  0.86s   B   order 246809: WriteConflict, transaction aborted, retrying
+  1.12s   B   order 246809: lot 597448 shows 42 left, taking 30
+  1.13s   B   order 246809: WriteConflict, transaction aborted, retrying
+  1.40s   B   order 246809: lot 597448 shows 42 left, taking 30
+  1.41s   B   order 246809: WriteConflict, transaction aborted, retrying
+  1.53s   A   order 246808: COMMIT (attempt 1)
+  1.67s   B   order 246809: lot 597448 shows 12 left, taking 12
+  1.67s   B   order 246809: lot 597454 shows 44 left, taking 18
+  1.68s   B   order 246809: COMMIT (attempt 6)
+
+After:
+  order 246808 confirmed: 30 from lot 597448
+  order 246809 confirmed: 12 from lot 597448, 18 from lot 597454
+  lot 597448: received 42, allocated 42 in total, 0 left
+  lot 597454: received 44, allocated 18 in total, 26 left
