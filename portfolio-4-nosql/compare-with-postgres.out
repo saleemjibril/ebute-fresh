@@ -1,0 +1,11 @@
+                               PostgreSQL    MongoDB
+Q1 tomato A in stock                   10         10  same
+Q2 unpaid lots                          2          2  same
+Q3 trace order                         10         10  same
+Q4 recall                               4          4  same
+Q5 monthly sales and margin            36         36  same
+Q6 near best-before                   300        300  same
+
+Value of every order line ever taken:
+  PostgreSQL 554449398000.00
+  MongoDB    554449398000.00
