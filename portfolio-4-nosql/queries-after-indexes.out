@@ -1,0 +1,82 @@
+
+==== Q1. Grade A tomato in stock, oldest first (sales desk) ====
+  {"_id":597448,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T05:05:47.498Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":42}
+  {"_id":597454,"centre":{"name":"Bukuru"},"received_at":{"$date":"2026-10-29T05:08:37.730Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":44}
+  {"_id":597501,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T05:42:36.779Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":52}
+  {"_id":597502,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T05:43:59.033Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":58}
+  {"_id":597506,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T05:46:26.285Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":62}
+  {"_id":597520,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T05:51:21.058Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":49}
+  {"_id":597552,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T06:04:42.621Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":37}
+  {"_id":597578,"centre":{"name":"Ogbomoso"},"received_at":{"$date":"2026-10-29T06:22:52.943Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":15}
+  {"_id":597608,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T06:35:02.716Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":55}
+  {"_id":597620,"centre":{"name":"Kadawa"},"received_at":{"$date":"2026-10-29T06:41:33.174Z"},"best_before":{"$date":"2026-11-05T00:00:00Z"},"qty_remaining":56}
+(10 documents)
+-- plan: LIMIT <- PROJECTION_DEFAULT <- FETCH <- IXSCAN(lots_in_stock)
+-- keys examined 10, documents examined 10, returned 10
+-- median of 5 runs: 0.88 ms
+
+==== Q2. Unpaid lots for farmer 124 (finance, Friday payout run) ====
+  {"_id":598556,"commodity":{"name":"Irish potato"},"grade":"B","received_at":{"$date":"2026-10-30T07:31:48.264Z"},"qty_received":29,"farm_gate_price":{"$numberDecimal":"28600.00"},"amount_due":{"$numberDecimal":"829400.00"}}
+  {"_id":599922,"commodity":{"name":"Cabbage"},"grade":"B","received_at":{"$date":"2026-10-31T12:57:47.333Z"},"qty_received":35,"farm_gate_price":{"$numberDecimal":"10600.00"},"amount_due":{"$numberDecimal":"371000.00"}}
+(2 documents)
+-- plan: PROJECTION_DEFAULT <- SORT <- FETCH <- IXSCAN(lots_farmer)
+-- keys examined 34, documents examined 34, returned 2
+-- median of 5 runs: 0.61 ms
+
+==== Q3. Trace order 240965 back to the farmers who supplied it ====
+  {"line_no":1,"commodity":"Irish potato","grade":"C","qty":24,"lot_id":583097,"received":"2026-10-12","farmer":"Pam Pam","centre":"Bukuru"}
+  {"line_no":2,"commodity":"Scotch bonnet","grade":"B","qty":16,"lot_id":583264,"received":"2026-10-12","farmer":"Funmilayo Oladejo","centre":"Ogbomoso"}
+  {"line_no":2,"commodity":"Scotch bonnet","grade":"B","qty":10,"lot_id":583275,"received":"2026-10-12","farmer":"Hadiza Ibrahim","centre":"Kadawa"}
+  {"line_no":3,"commodity":"Tomato","grade":"A","qty":36,"lot_id":583308,"received":"2026-10-12","farmer":"Rabi Garba","centre":"Kadawa"}
+  {"line_no":3,"commodity":"Tomato","grade":"A","qty":55,"lot_id":583312,"received":"2026-10-12","farmer":"Aminu Danjuma","centre":"Kadawa"}
+  {"line_no":3,"commodity":"Tomato","grade":"A","qty":43,"lot_id":583326,"received":"2026-10-12","farmer":"Bitrus Gyang","centre":"Bukuru"}
+  {"line_no":3,"commodity":"Tomato","grade":"A","qty":4,"lot_id":583335,"received":"2026-10-12","farmer":"Funmilayo Oladejo","centre":"Ogbomoso"}
+  {"line_no":4,"commodity":"Yam","grade":"C","qty":366,"lot_id":583096,"received":"2026-10-12","farmer":"Aondona Akaa","centre":"Zaki Biam"}
+  {"line_no":4,"commodity":"Yam","grade":"C","qty":194,"lot_id":583137,"received":"2026-10-12","farmer":"Bukola Ogunleye","centre":"Ogbomoso"}
+  {"line_no":4,"commodity":"Yam","grade":"C","qty":231,"lot_id":583192,"received":"2026-10-12","farmer":"Orduen Ugba","centre":"Zaki Biam"}
+(10 documents)
+-- plan: EXPRESS_IXSCAN(_id_)
+-- keys examined 1, documents examined 1, returned 1
+-- median of 5 runs: 0.70 ms
+
+==== Q4. Recall: who received tomatoes from farmer 1370, 1 to 15 October 2026 ====
+  {"customer":"Unity Eatery 365","phone":"+2349000000365","order_id":237343,"delivery_date":"2026-10-03","lot_id":573968,"qty":55}
+  {"customer":"Divine Kitchen 2985","phone":"+2349000002985","order_id":238093,"delivery_date":"2026-10-04","lot_id":574832,"qty":9}
+  {"customer":"Grace Events 2065","phone":"+2349000002065","order_id":238030,"delivery_date":"2026-10-04","lot_id":574832,"qty":52}
+  {"customer":"Grace Kitchen 392","phone":"+2349000000392","order_id":239530,"delivery_date":"2026-10-08","lot_id":578274,"qty":58}
+(4 documents)
+-- plan: PROJECTION_SIMPLE <- FETCH <- IXSCAN(lots_farmer)
+-- keys examined 3, documents examined 3, returned 3
+-- median of 5 runs: 0.64 ms
+
+==== Q5. Sales and margin by month, commodity and source state, July to September 2026 ====
+36 documents, first 10:
+  {"_id":{"month":"2026-07","commodity":"Cabbage","state":"Plateau"},"units":22973,"revenue":{"$numberDecimal":"392971700.00"},"margin":{"$numberDecimal":"148640750.00"}}
+  {"_id":{"month":"2026-07","commodity":"Carrot","state":"Plateau"},"units":22766,"revenue":{"$numberDecimal":"539588900.00"},"margin":{"$numberDecimal":"201374900.00"}}
+  {"_id":{"month":"2026-07","commodity":"Irish potato","state":"Plateau"},"units":45206,"revenue":{"$numberDecimal":"1978443950.00"},"margin":{"$numberDecimal":"739759050.00"}}
+  {"_id":{"month":"2026-07","commodity":"Onion","state":"Kano"},"units":42027,"revenue":{"$numberDecimal":"4026598200.00"},"margin":{"$numberDecimal":"1510741400.00"}}
+  {"_id":{"month":"2026-07","commodity":"Plantain","state":"Ogun"},"units":341141,"revenue":{"$numberDecimal":"2312595950.00"},"margin":{"$numberDecimal":"869663250.00"}}
+  {"_id":{"month":"2026-07","commodity":"Scotch bonnet","state":"Kano"},"units":43029,"revenue":{"$numberDecimal":"1604555050.00"},"margin":{"$numberDecimal":"603536000.00"}}
+  {"_id":{"month":"2026-07","commodity":"Scotch bonnet","state":"Oyo"},"units":28965,"revenue":{"$numberDecimal":"1069894150.00"},"margin":{"$numberDecimal":"401489350.00"}}
+  {"_id":{"month":"2026-07","commodity":"Tomato","state":"Kano"},"units":177905,"revenue":{"$numberDecimal":"5371357200.00"},"margin":{"$numberDecimal":"2009912450.00"}}
+  {"_id":{"month":"2026-07","commodity":"Tomato","state":"Oyo"},"units":57970,"revenue":{"$numberDecimal":"1761968850.00"},"margin":{"$numberDecimal":"661411650.00"}}
+  {"_id":{"month":"2026-07","commodity":"Tomato","state":"Plateau"},"units":51641,"revenue":{"$numberDecimal":"1554126400.00"},"margin":{"$numberDecimal":"585556050.00"}}
+-- plan: PROJECTION_SIMPLE <- FETCH <- IXSCAN(orders_status_delivery)
+-- keys examined 31349, documents examined 31349, returned 31349
+-- median of 5 runs: 227.71 ms
+
+==== Q6. Stock reaching best-before in the next two days, as at 10 November 2026 ====
+300 documents, first 10:
+  {"_id":599182,"commodity":{"name":"Plantain"},"grade":"B","centre":{"name":"Ijebu-Ode"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":20}
+  {"_id":599183,"commodity":{"name":"Plantain"},"grade":"B","centre":{"name":"Ijebu-Ode"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":65}
+  {"_id":599184,"commodity":{"name":"Scotch bonnet"},"grade":"C","centre":{"name":"Kadawa"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":11}
+  {"_id":599185,"commodity":{"name":"Plantain"},"grade":"A","centre":{"name":"Ijebu-Ode"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":44}
+  {"_id":599187,"commodity":{"name":"Scotch bonnet"},"grade":"A","centre":{"name":"Kadawa"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":20}
+  {"_id":599189,"commodity":{"name":"Plantain"},"grade":"C","centre":{"name":"Ijebu-Ode"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":100}
+  {"_id":599191,"commodity":{"name":"Plantain"},"grade":"B","centre":{"name":"Ijebu-Ode"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":69}
+  {"_id":599194,"commodity":{"name":"Scotch bonnet"},"grade":"A","centre":{"name":"Ogbomoso"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":16}
+  {"_id":599196,"commodity":{"name":"Plantain"},"grade":"C","centre":{"name":"Ijebu-Ode"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":89}
+  {"_id":599199,"commodity":{"name":"Plantain"},"grade":"C","centre":{"name":"Ijebu-Ode"},"best_before":{"$date":"2026-11-10T00:00:00Z"},"qty_remaining":44}
+-- plan: SORT <- PROJECTION_DEFAULT <- FETCH <- IXSCAN(lots_best_before)
+-- keys examined 300, documents examined 300, returned 300
+-- median of 5 runs: 1.98 ms

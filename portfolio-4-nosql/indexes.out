@@ -1,0 +1,10 @@
+
+lots indexes:
+  _id_                       16044 kB
+  lots_in_stock                 48 kB
+  lots_farmer                 9072 kB
+  lots_best_before              48 kB
+
+orders indexes:
+  _id_                        5624 kB
+  orders_status_delivery      2540 kB
