@@ -1,0 +1,232 @@
+=== A. Asynchronous replication: stale read
+
+--- The replica falls behind.
+
+[replica 5441]
+SELECT pg_wal_replay_pause();
+ pg_wal_replay_pause 
+---------------------
+ 
+(1 row)
+
+SELECT pg_get_wal_replay_pause_state();
+ pg_get_wal_replay_pause_state 
+-------------------------------
+ paused
+(1 row)
+
+
+--- Lagoon View pays part of order 6. Finance records it on the primary.
+
+[primary 5440]
+
+INSERT INTO payment (order_id, amount, method, reference, paid_at)
+VALUES (6, 600000, 'transfer', 'NIP000231112058', '2026-11-12 10:14+01')
+RETURNING payment_id;
+ payment_id 
+------------
+          6
+(1 row)
+
+INSERT 0 1
+
+--- The customer calls the sales desk, whose screen reads from the replica.
+
+[replica 5441]
+SELECT payment_id, amount, reference FROM payment WHERE order_id = 6;
+ payment_id | amount | reference 
+------------+--------+-----------
+(0 rows)
+
+
+[primary 5440]
+
+SELECT sync_state, pg_wal_lsn_diff(sent_lsn, replay_lsn) AS bytes_not_yet_replayed
+FROM pg_stat_replication;
+ sync_state | bytes_not_yet_replayed 
+------------+------------------------
+ async      |                   1768
+(1 row)
+
+
+--- The replica catches up.
+
+[replica 5441]
+SELECT pg_wal_replay_resume();
+ pg_wal_replay_resume 
+----------------------
+ 
+(1 row)
+
+
+[replica 5441]
+SELECT payment_id, amount, reference FROM payment WHERE order_id = 6;
+ payment_id |  amount   |    reference    
+------------+-----------+-----------------
+          6 | 600000.00 | NIP000231112058
+(1 row)
+
+
+=== B. Synchronous replication with remote_apply
+
+[primary 5440]
+ALTER SYSTEM SET synchronous_standby_names = 'ebute_replica';
+ALTER SYSTEM
+ALTER SYSTEM SET synchronous_commit = 'remote_apply';
+ALTER SYSTEM
+SELECT pg_reload_conf();
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+
+[primary 5440]
+SELECT application_name, sync_state FROM pg_stat_replication;
+ application_name | sync_state 
+------------------+------------
+ ebute_replica    | sync
+(1 row)
+
+
+--- The replica falls behind again.
+
+[replica 5441]
+SELECT pg_wal_replay_pause();
+ pg_wal_replay_pause 
+---------------------
+ 
+(1 row)
+
+
+--- Finance records the balance of order 6. This session runs in the background.
+
+--- One second later, what is that session doing?
+
+[primary 5440]
+
+SELECT pid, wait_event_type, wait_event, state, left(query, 40) AS query
+FROM pg_stat_activity
+WHERE wait_event = 'SyncRep';
+  pid  | wait_event_type | wait_event | state  |                  query                   
+-------+-----------------+------------+--------+------------------------------------------
+ 20294 | IPC             | SyncRep    | active | INSERT INTO payment (order_id, amount, m
+(1 row)
+
+
+--- Three seconds in, the replica resumes replay.
+
+[replica 5441]
+SELECT pg_wal_replay_resume();
+ pg_wal_replay_resume 
+----------------------
+ 
+(1 row)
+
+
+--- Output of the background session:
+   Timing is on.
+   INSERT INTO payment (order_id, amount, method, reference, paid_at)
+   VALUES (6, 630000, 'transfer', 'NIP000231112311', '2026-11-12 15:40+01');
+   INSERT 0 1
+   Time: 3077.389 ms (00:03.077)
+
+--- The moment the commit returned, the replica already had it.
+
+[replica 5441]
+SELECT payment_id, amount, reference FROM payment WHERE order_id = 6;
+ payment_id |  amount   |    reference    
+------------+-----------+-----------------
+          6 | 600000.00 | NIP000231112058
+          7 | 630000.00 | NIP000231112311
+(2 rows)
+
+
+=== C. Synchronous replication when the replica is down
+waiting for server to shut down.... done
+server stopped
+
+[primary 5440]
+SELECT count(*) AS replicas_connected FROM pg_stat_replication;
+ replicas_connected 
+--------------------
+                  0
+(1 row)
+
+
+--- Finance records a payment for order 7. This session runs in the background.
+
+--- Five seconds later it is still waiting for a replica that is not there.
+
+[primary 5440]
+
+SELECT pid, wait_event, now() - query_start AS waiting_for, left(query, 40) AS query
+FROM pg_stat_activity
+WHERE wait_event = 'SyncRep';
+  pid  | wait_event |   waiting_for   |                  query                   
+-------+------------+-----------------+------------------------------------------
+ 20310 | SyncRep    | 00:00:05.011887 | INSERT INTO payment (order_id, amount, m
+(1 row)
+
+
+--- Finance gives up and the session is cancelled.
+
+[primary 5440]
+
+SELECT pg_cancel_backend(pid) FROM pg_stat_activity WHERE wait_event = 'SyncRep';
+ pg_cancel_backend 
+-------------------
+ t
+(1 row)
+
+
+--- Output of the background session:
+   Timing is on.
+   INSERT INTO payment (order_id, amount, method, reference, paid_at)
+   VALUES (7, 855000, 'transfer', 'NIP000231112402', '2026-11-12 16:05+01');
+   WARNING:  canceling wait for synchronous replication due to user request
+   DETAIL:  The transaction has already committed locally, but might not have been replicated to the standby.
+   INSERT 0 1
+   Time: 5031.610 ms (00:05.032)
+
+[primary 5440]
+SELECT payment_id, order_id, amount FROM payment WHERE order_id = 7;
+ payment_id | order_id |  amount   
+------------+----------+-----------
+          8 |        7 | 855000.00
+(1 row)
+
+
+--- The replica comes back and catches up from the replication slot.
+waiting for server to start.... done
+server started
+
+[replica 5441]
+SELECT payment_id, order_id, amount FROM payment WHERE order_id = 7;
+ payment_id | order_id |  amount   
+------------+----------+-----------
+          8 |        7 | 855000.00
+(1 row)
+
+
+--- Back to asynchronous replication for the rest of the portfolio.
+
+[primary 5440]
+ALTER SYSTEM RESET synchronous_standby_names;
+ALTER SYSTEM
+ALTER SYSTEM RESET synchronous_commit;
+ALTER SYSTEM
+SELECT pg_reload_conf();
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+
+[primary 5440]
+SELECT application_name, sync_state FROM pg_stat_replication;
+ application_name | sync_state 
+------------------+------------
+ ebute_replica    | async
+(1 row)
+
