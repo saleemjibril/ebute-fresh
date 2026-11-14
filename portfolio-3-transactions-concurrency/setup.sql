@@ -1,6 +1,6 @@
 -- Resets the database to a known state before each demo.
--- run-all.sh calls this before every script, so each output starts from
--- the same data.
+-- run-pair.sh runs this before each two-session demo, and the README runs
+-- it before 01 and 02, so each output starts from the same data.
 --
 -- It rebuilds the Portfolio 1 schema and sample week, so it also removes
 -- the generated data from Portfolio 2.
