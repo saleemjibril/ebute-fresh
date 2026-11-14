@@ -109,7 +109,7 @@ allocations on each side.
 
 Even with allocations, names and reference data copied, the uncompressed data is about
 the same size as the PostgreSQL tables. MongoDB compresses it on disk, so it takes about
-195 MB, against 761 MB for the PostgreSQL database.
+195 MB, against 760 MB for the PostgreSQL database.
 
 `compare-with-postgres.py` then ran all six queries against both databases. Every result
 was identical, row for row, and so was the total value of all 388,938 order lines
